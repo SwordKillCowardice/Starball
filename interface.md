@@ -1,9 +1,7 @@
-
 # 在线台球游戏接口定义文档 (API Specification)
 
 **版本:** 1.0.0
 **最后更新:** 2025-09-27
-**负责人:** Gemini
 **技术架构:** 客户端权威 (Client-Authoritative) + 客户端预测 (Client-Side Prediction) + 服务器和解 (Server Reconciliation)
 
 ## 1. 概述
