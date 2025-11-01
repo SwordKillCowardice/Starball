@@ -1,6 +1,6 @@
-import { TurnData, Vector, BallState } from "../type";
-import { Ball } from "./ball";
-import { Table } from "./Table";
+import { TurnData, Vector, BallState } from "../type.js";
+import { Ball } from "./Ball.js";
+import { Table } from "./Table.js";
 
 export class PhysicsWorld {
   balls: Map<number, Ball>;

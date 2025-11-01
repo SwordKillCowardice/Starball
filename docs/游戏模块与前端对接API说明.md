@@ -25,7 +25,7 @@
 ### 1.1 最小可运行示例
 
 ```typescript
-import Game from './gameplay/Game';
+import Game from '../GameLogic/Game';
 
 // 创建游戏实例
 const game = new Game();

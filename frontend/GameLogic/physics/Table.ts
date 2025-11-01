@@ -1,5 +1,5 @@
-import { Vector } from "../type";
-import { Ball } from "./ball";
+import { Vector } from "../type.js";
+import { Ball } from "./Ball.js";
 
 export class Table {
   width: number;

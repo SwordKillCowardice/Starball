@@ -1,0 +1,27 @@
+
+{
+  "name": "billiards-game",
+  "version": "1.0.0",
+  "description": "在线台球游戏",
+  "main": "dist/main/app.js",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "dev": "concurrently \"npm run watch\" \"npm run serve\"",
+    "serve": "live-server --port=5500 --entry-file=frontend/main/index.html",
+    "clean": "rimraf dist"
+  },
+  "keywords": [
+    "billiards",
+    "game",
+    "typescript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "concurrently": "^8.2.2",
+    "live-server": "^1.2.2",
+    "rimraf": "^5.0.5"
+  }
+}

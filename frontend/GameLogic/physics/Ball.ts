@@ -1,4 +1,4 @@
-import { BallState, Vector } from "../type";
+import { BallState, Vector } from "../type.js";
 
 export class Ball {
   id: number;

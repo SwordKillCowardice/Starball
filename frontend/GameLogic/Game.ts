@@ -1,7 +1,7 @@
-import { Ball } from "./physics/ball";
-import { PhysicsWorld } from "./physics/PhysicsWorld";
-import { RuleEngine } from "./rules/RuleEngine";
-import { GameState, TurnReport, BallState, Player, Vector } from "./type";
+import { Ball } from "./physics/Ball.js";
+import { PhysicsWorld } from "./physics/PhysicsWorld.js";
+import { RuleEngine } from "./rules/RuleEngine.js";
+import { GameState, TurnReport, BallState, Player, Vector } from "./type.js";
 
 export class Game {
   private physicsWorld: PhysicsWorld;

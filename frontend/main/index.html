@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>台球游戏</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="game-container">
+        <h1>🎱 在线台球游戏</h1>
+
+        <!-- 游戏状态显示 -->
+        <div class="game-state" id="gameState">
+            准备开始游戏...
+        </div>
+
+        <!-- 玩家信息 -->
+        <div class="game-info">
+            <div class="player-info" id="player1Info">
+                <div class="player-avatar">👤</div>
+                <div class="player-name" id="player1Name">玩家 1</div>
+                <div class="player-score">
+                    进球: <span id="p1Score">0</span>
+                </div>
+                <div class="player-type" id="player1Type">-</div>
+            </div>
+
+            <div class="vs-divider">VS</div>
+
+            <div class="player-info" id="player2Info">
+                <div class="player-avatar">👤</div>
+                <div class="player-name" id="player2Name">玩家 2</div>
+                <div class="player-score">
+                    进球: <span id="p2Score">0</span>
+                </div>
+                <div class="player-type" id="player2Type">-</div>
+            </div>
+        </div>
+
+        <!-- 游戏画布 -->
+        <div class="canvas-wrapper">
+            <canvas id="gameCanvas" width="800" height="400"></canvas>
+
+            <!-- 瞄准线叠加层 -->
+            <canvas id="aimCanvas" width="800" height="400"></canvas>
+        </div>
+
+        <!-- 击球控制 -->
+        <div class="strike-controls" id="strikeControls">
+            <div class="control-row">
+                <label for="powerSlider">击球力度:</label>
+                <input type="range" id="powerSlider" min="10" max="150" value="60" step="5">
+                <span class="power-value" id="powerValue">60</span>
+            </div>
+
+            <div class="control-row">
+                <label for="angleSlider">击球角度:</label>
+                <input type="range" id="angleSlider" min="0" max="360" value="0" step="5">
+                <span class="angle-value" id="angleValue">0°</span>
+            </div>
+        </div>
+
+        <!-- 控制按钮 -->
+        <div class="controls">
+            <button class="btn btn-primary" id="startBtn" onclick="gameController.startNewGame()">
+                🎮 开始新游戏
+            </button>
+            <button class="btn btn-secondary" id="strikeBtn" onclick="gameController.handleStrike()" disabled>
+                ⚡ 击球
+            </button>
+            <button class="btn btn-info" id="randomBtn" onclick="gameController.randomStrike()">
+                🎲 随机击球
+            </button>
+            <button class="btn btn-danger" id="resetBtn" onclick="gameController.resetGame()">
+                🔄 重置游戏
+            </button>
+        </div>
+
+        <!-- 游戏日志 -->
+        <div class="log-section">
+            <h3>游戏日志</h3>
+            <div class="log" id="gameLog">
+                <div class="log-entry">等待游戏开始...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 胜利弹窗 -->
+    <div class="winner-overlay" id="winnerOverlay">
+        <div class="winner-modal">
+            <div class="trophy">🏆</div>
+            <h2>游戏结束！</h2>
+            <p id="winnerText"></p>
+            <button class="btn btn-primary" onclick="gameController.startNewGame()">
+                再来一局
+            </button>
+        </div>
+    </div>
+
+    <!-- 引入脚本 -->
+    <script type="module" src="../../dist/main/app.js"></script>
+</body>
+
+</html>

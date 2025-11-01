@@ -1,0 +1,39 @@
+
+{
+  "compilerOptions": {
+    /* 语言和环境 */
+    "target": "ES2020",                          /* 设置编译后的JavaScript版本 */
+    "lib": ["ES2020", "DOM"],                    /* 指定要包含的库文件 */
+    "module": "ESNext",                          /* 指定模块代码生成 */
+    "moduleResolution": "node",                  /* 指定模块解析策略 */
+
+    /* 输出 */
+    "outDir": "./dist",                          /* 指定输出目录 */
+    "rootDir": "./frontend",                     /* 指定输入文件的根目录 */
+    "removeComments": false,                     /* 保留注释 */
+    "sourceMap": true,                           /* 生成source map文件，方便调试 */
+
+    /* 类型检查 */
+    "strict": true,                              /* 启用所有严格类型检查选项 */
+    "noImplicitAny": true,                       /* 禁止隐式any类型 */
+    "strictNullChecks": true,                    /* 严格空值检查 */
+    "strictFunctionTypes": true,                 /* 严格函数类型检查 */
+    "noUnusedLocals": false,                     /* 报告未使用的局部变量 */
+    "noUnusedParameters": false,                 /* 报告未使用的参数 */
+
+    /* 互操作约束 */
+    "esModuleInterop": true,                     /* 启用ES模块互操作性 */
+    "allowSyntheticDefaultImports": true,        /* 允许合成默认导入 */
+    "forceConsistentCasingInFileNames": true,    /* 强制文件名大小写一致 */
+
+    /* 跳过库检查 */
+    "skipLibCheck": true                         /* 跳过声明文件的类型检查 */
+  },
+  "include": [
+    "frontend/**/*"                              /* 包含所有frontend目录下的文件 */
+  ],
+  "exclude": [
+    "node_modules",                              /* 排除node_modules */
+    "dist"                                       /* 排除输出目录 */
+  ]
+}
