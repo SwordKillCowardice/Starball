@@ -31,19 +31,27 @@ export class Ball {
   update(deltaTime: number, friction: number = 0.98): void {
     if (this.isPocketed) return;
 
-    // 更新位置
-    this.position.x += this.velocity.x * deltaTime;
-    this.position.y += this.velocity.y * deltaTime;
+    // 计算下一帧的位置
+    const nextX = this.position.x + this.velocity.x * deltaTime;
+    const nextY = this.position.y + this.velocity.y * deltaTime;
 
-    // 应用摩擦力
-    this.velocity.x *= friction;
-    this.velocity.y *= friction;
+    // 应用摩擦力（基于时间的衰减）
+    const frictionFactor = Math.pow(friction, deltaTime * 60); // 标准化到60fps
+    this.velocity.x *= frictionFactor;
+    this.velocity.y *= frictionFactor;
 
-    // 速度过小时停止
+    // 速度过小时停止（阈值也要考虑时间步长）
     const speed = Math.sqrt(this.velocity.x ** 2 + this.velocity.y ** 2);
-    if (speed < 0.1) {
+    const minSpeed = 5; // 降低最小速度阈值
+    if (speed < minSpeed) {
       this.velocity.x = 0;
       this.velocity.y = 0;
+    }
+
+    // 更新位置（只有在速度不为零时才更新）
+    if (this.velocity.x !== 0 || this.velocity.y !== 0) {
+      this.position.x = nextX;
+      this.position.y = nextY;
     }
   }
 

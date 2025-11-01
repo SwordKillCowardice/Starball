@@ -25,18 +25,47 @@ export class Table {
    * 检查球是否在袋口附近（进球判定）
    */
   checkPocket(ball: Ball): boolean {
-    const pocketRadius = 25; // 袋口半径
+    const pocketRadius = 50; // 袋口半径
+    const effectiveRadius = pocketRadius + ball.radius; // 有效进球半径（袋口半径+球半径）
 
-    for (const pocket of this.pockets) {
+    // 调试球的位置
+    console.log(`\nChecking Ball ${ball.id}:`);
+    console.log(`Position: (${ball.position.x.toFixed(2)}, ${ball.position.y.toFixed(2)})`);
+    console.log(`Effective pocket radius: ${effectiveRadius}`);
+
+    let minDistance = Infinity;
+    let closestPocket = -1;
+
+    // 用来标记是否有任何一个袋口满足进球条件
+    let isPocketed = false;
+
+    for (let i = 0; i < this.pockets.length; i++) {
+      const pocket = this.pockets[i];
       const dx = ball.position.x - pocket.x;
       const dy = ball.position.y - pocket.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
 
-      if (distance < pocketRadius) {
-        return true;
+      // 更新最小距离
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestPocket = i;
+      }
+
+      // 调试每个口袋的距离
+      console.log(`  Pocket ${i} at (${pocket.x}, ${pocket.y}) - distance: ${distance.toFixed(2)}`);
+
+      // 检查是否进球（注意：移除了if条件中的break）
+      if (distance < effectiveRadius) {
+        isPocketed = true;
+        console.log(`  ** Ball ${ball.id} can be pocketed in pocket ${i}! **`);
       }
     }
-    return false;
+
+    // 输出最终判定信息
+    console.log(`Closest pocket: ${closestPocket} (distance: ${minDistance.toFixed(2)})`);
+
+    // 只返回是否有任何袋口满足进球条件
+    return isPocketed;
   }
 
   /**

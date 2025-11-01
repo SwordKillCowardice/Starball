@@ -1,3 +1,5 @@
 *~
 con.py
 node_modules/
+dist/
+build/

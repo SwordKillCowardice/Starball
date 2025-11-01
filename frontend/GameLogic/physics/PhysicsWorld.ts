@@ -34,28 +34,43 @@ export class PhysicsWorld {
    * 物理步进
    */
   step(deltaTime: number): void {
-    // 更新所有球的位置
-    for (const ball of this.balls.values()) {
-      ball.update(deltaTime);
+    // 限制最大时间步长，防止大延迟导致的穿透
+    const maxDeltaTime = 1 / 60; // 最大时间步长为1/60秒
+    const steps = Math.ceil(deltaTime / maxDeltaTime);
+    const actualDeltaTime = deltaTime / steps;
+
+    // 进行多次小步长的物理更新
+    for (let i = 0; i < steps; i++) {
+      // 更新所有球的位置
+      for (const ball of this.balls.values()) {
+        ball.update(actualDeltaTime);
+      }
+
+      // 检测并处理碰撞（可能需要多次迭代）
+      const maxCollisionIterations = 3;
+      for (let j = 0; j < maxCollisionIterations; j++) {
+        if (!this.handleCollisions()) {
+          break; // 如果没有发生碰撞，提前退出循环
+        }
+      }
+
+      // 处理边界碰撞
+      for (const ball of this.balls.values()) {
+        this.table.handleWallCollision(ball);
+      }
     }
 
-    // 检测并处理碰撞
-    this.handleCollisions();
-
-    // 检测进球
+    // 检测进球（只在物理更新完成后检查一次）
     this.checkPockets();
-
-    // 处理边界碰撞
-    for (const ball of this.balls.values()) {
-      this.table.handleWallCollision(ball);
-    }
   }
 
   /**
    * 处理球与球之间的碰撞
+   * @returns 是否发生了任何碰撞
    */
-  private handleCollisions(): void {
+  private handleCollisions(): boolean {
     const ballArray = Array.from(this.balls.values());
+    let hasCollision = false;
 
     for (let i = 0; i < ballArray.length; i++) {
       for (let j = i + 1; j < ballArray.length; j++) {
@@ -77,9 +92,12 @@ export class PhysicsWorld {
 
           // 碰撞响应
           this.resolveCollision(ball1, ball2);
+          hasCollision = true;
         }
       }
     }
+
+    return hasCollision;
   }
 
   /**
@@ -97,12 +115,25 @@ export class PhysicsWorld {
     const nx = dx / distance;
     const ny = dy / distance;
 
-    // 分离重叠的球
-    const overlap = ball1.radius + ball2.radius - distance;
-    ball1.position.x -= nx * overlap / 2;
-    ball1.position.y -= ny * overlap / 2;
-    ball2.position.x += nx * overlap / 2;
-    ball2.position.y += ny * overlap / 2;
+    // 分离重叠的球（添加一点额外的分离距离以防止卡住）
+    const overlap = ball1.radius + ball2.radius - distance + 0.5;
+    const separationX = nx * overlap / 2;
+    const separationY = ny * overlap / 2;
+
+    // 对静止的球给予较小的分离
+    if (ball1.isStationary() && !ball2.isStationary()) {
+      ball2.position.x += separationX * 2;
+      ball2.position.y += separationY * 2;
+    } else if (!ball1.isStationary() && ball2.isStationary()) {
+      ball1.position.x -= separationX * 2;
+      ball1.position.y -= separationY * 2;
+    } else {
+      // 两球都在运动，平均分配分离距离
+      ball1.position.x -= separationX;
+      ball1.position.y -= separationY;
+      ball2.position.x += separationX;
+      ball2.position.y += separationY;
+    }
 
     // 相对速度
     const dvx = ball2.velocity.x - ball1.velocity.x;
@@ -112,15 +143,28 @@ export class PhysicsWorld {
     // 如果球正在分离，不处理
     if (dvn > 0) return;
 
-    // 冲量计算（假设完全弹性碰撞）
-    const restitution = 0.95;
+    // 冲量计算（轻微非弹性碰撞）
+    const restitution = 0.92; // 降低一点弹性系数
     const impulse = (-(1 + restitution) * dvn) / (1 / ball1.mass + 1 / ball2.mass);
 
-    // 应用冲量
+    // 获取切向分量
+    const tx = -ny;
+    const ty = nx;
+    const tangentVelocity = dvx * tx + dvy * ty;
+
+    // 应用法向冲量
     ball1.velocity.x -= (impulse / ball1.mass) * nx;
     ball1.velocity.y -= (impulse / ball1.mass) * ny;
     ball2.velocity.x += (impulse / ball2.mass) * nx;
     ball2.velocity.y += (impulse / ball2.mass) * ny;
+
+    // 应用切向摩擦（模拟旋转效果）
+    const friction = 0.1;
+    const tangentImpulse = -tangentVelocity * friction;
+    ball1.velocity.x -= (tangentImpulse / ball1.mass) * tx;
+    ball1.velocity.y -= (tangentImpulse / ball1.mass) * ty;
+    ball2.velocity.x += (tangentImpulse / ball2.mass) * tx;
+    ball2.velocity.y += (tangentImpulse / ball2.mass) * ty;
   }
 
   /**

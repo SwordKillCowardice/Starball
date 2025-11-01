@@ -123,17 +123,23 @@ export class GameUI {
      * 添加日志
      */
     log(message, type = 'info') {
+        const logMessages = this.gameLog.querySelector('.log-messages');
+        if (!logMessages)
+            return;
         const entry = document.createElement('div');
-        entry.className = `log-entry ${type}`;
+        entry.className = `log-message ${type}`;
         entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-        this.gameLog.appendChild(entry);
+        logMessages.appendChild(entry);
         this.gameLog.scrollTop = this.gameLog.scrollHeight;
     }
     /**
      * 清空日志
      */
     clearLog() {
-        this.gameLog.innerHTML = '<div class="log-entry">日志已清空</div>';
+        const logMessages = this.gameLog.querySelector('.log-messages');
+        if (logMessages) {
+            logMessages.innerHTML = '<div class="log-message info">日志已清空</div>';
+        }
     }
     /**
      * 监听力度变化

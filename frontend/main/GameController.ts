@@ -181,7 +181,7 @@ export class GameController {
      * 随机击球
      */
     public randomStrike(): void {
-        const randomPower = Math.floor(Math.random() * 100) + 30;
+        const randomPower = Math.floor(Math.random() * 2700) + 300; // 范围300-3000
         const randomAngle = Math.floor(Math.random() * 360);
 
         this.ui.setPower(randomPower);
