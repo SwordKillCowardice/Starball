@@ -44,7 +44,6 @@ file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 
 
-# 数据库初始化
 def initialize_table():
     """创建数据库，建立表格"""
     with sq.connect("starball.db") as conn:
@@ -102,7 +101,6 @@ def initialize_table():
         conn.commit()
 
 
-# 用户注册
 @app.route("/api/auth/register", methods=["POST"])
 def register():
     """处理注册逻辑"""
@@ -142,7 +140,13 @@ def register():
             user_id = cur.lastrowid
             logger.info("用户%s注册成功", user_name)
             return (
-                jsonify({"message": "ok", "data": {"user_id": user_id, "coins": 300}}),
+                jsonify(
+                    {
+                        "message": "ok",
+                        "data": {"user_id": user_id, "coins": 300},
+                        "error": "",
+                    }
+                ),
                 201,
             )
     except sq.Error:
@@ -150,7 +154,6 @@ def register():
         return jsonify({"message": "fail", "data": {}, "error": "数据库服务异常"}), 500
 
 
-# 用户登录
 @app.route("/api/auth/login", methods=["POST"])
 def login():
     """处理登录逻辑"""
@@ -163,8 +166,8 @@ def login():
         password = data.get("password")
         if not user_name or not password:
             raise ValueError("用户名或密码为空")
-    except ValueError as reg_error:
-        logger.warning("登录失败: %s", reg_error)
+    except ValueError as log_error:
+        logger.warning("登录失败: %s", log_error)
         return jsonify({"message": "fail", "data": {}, "error": "无效的请求"}), 400
 
     # 执行操作
@@ -194,7 +197,11 @@ def login():
             logger.info("登录成功")
             return (
                 jsonify(
-                    {"message": "ok", "data": {"user_id": res[0], "coins": res[2]}}
+                    {
+                        "message": "ok",
+                        "data": {"user_id": res[0], "coins": res[2]},
+                        "error": "",
+                    }
                 ),
                 200,
             )
@@ -203,137 +210,189 @@ def login():
         return jsonify({"message": "fail", "data": {}, "error": "数据库服务异常"}), 500
 
 
-# 用户信息接口
-@app.route("/api/auth/userinfo", methods=["GET"])
+@app.route("/api/user", methods=["GET"])
 def get_user_info():
     """获取用户信息"""
-    # 验证前端数据
+    # 检查数据
     try:
         user_id = int(request.args.get("user_id"))
-    except Exception as info_error:
-        print(f"前端传递无效数据:{info_error}")
-        return jsonify({"message": "Fail", "data": {}}), 400
+    except (TypeError, ValueError) as info_error:
+        logger.warning("获取用户信息失败: %s", info_error)
+        return jsonify({"message": "fail", "data": {}, "error": "无效的请求"}), 400
 
-    # 后端执行操作
+    # 执行操作
     try:
         with sq.connect("starball.db") as conn:
             conn.row_factory = sq.Row
             cur = conn.cursor()
             cur.execute(
-                "SELECT coins, bar_number, total_games, win_games, win_rate, picture "
+                "SELECT coins, bar_possess, total_games, win_games, win_rate, picture "
                 "FROM user_info WHERE user_id = ?",
                 (user_id,),
             )
             res = cur.fetchone()
+
+            # 判定结果
             if not res:
-                print("获取信息失败")
-                return jsonify({"message": "Fail", "data": {}}), 404
-            print("获取信息成功")
-            return jsonify({"message": "Success", "data": dict(res)}), 200
-    except Exception as info_error:
-        print(f"获取信息服务异常:{info_error}")
-        return jsonify({"message": "Fail", "data": {}}), 500
+                logger.warning("不存在的用户尝试获取信息: user_id=%s", user_id)
+                return (
+                    jsonify({"message": "fail", "data": {}, "error": "获取信息失败"}),
+                    404,
+                )
+
+            logger.info("用户%s获取信息成功", user_id)
+            return jsonify({"message": "ok", "data": dict(res), "error": ""}), 200
+    except sq.Error:
+        logger.exception("数据库服务异常")
+        return jsonify({"message": "fail", "data": {}, "error": "数据库服务异常"}), 500
 
 
-# 商城信息接口
-@app.route("/api/auth/market", methods=["GET"])
-def show_market():
-    """获取商城信息"""
-    # 验证前端数据
+@app.route("/api/bar/list", methods=["GET"])
+def show_bar():
+    """显示球杆信息"""
+    # 检查数据
     try:
         user_id = int(request.args.get("user_id"))
-    except Exception as market_error:
-        print(f"客户端传递无效数据:{market_error}")
-        return jsonify({"message": "Fail", "data": {}}), 400
+    except (TypeError, ValueError) as info_error:
+        logger.warning("获取球杆信息失败: %s", info_error)
+        return jsonify({"message": "fail", "data": {}, "error": "无效的请求"}), 400
 
-    # 执行后端操作
+    # 执行操作
     try:
         with sq.connect("starball.db") as conn:
             conn.row_factory = sq.Row
             cur = conn.cursor()
             cur.execute(
-                "SELECT bar_number FROM user_info WHERE user_id = ?", (user_id,)
+                "SELECT bar_possess FROM user_info WHERE user_id = ?", (user_id,)
             )
             res = cur.fetchone()
             if not res:
-                print("获取商城信息失败")
-                return jsonify({"message": "Fail", "data": {}}), 404
-            bar_numdict = {"bar_number": res[0]}
-            cur.execute("SELECT * FROM bar_info")
-            res = cur.fetchall()
-            items = [dict(r) for r in res]
-            bar_dict = {"bar_data": items}
-            print("获取商城信息成功")
-            return jsonify({"message": "Success", "data": bar_numdict | bar_dict}), 200
-    except Exception as market_error:
-        print(f"获取商城信息服务异常:{market_error}")
-        return jsonify({"message": "Fail", "data": {}}), 500
+                logger.warning("不存在的用户尝试获取球杆信息: user_id=%s", user_id)
+                return (
+                    jsonify({"message": "fail", "data": {}, "error": "获取信息失败"}),
+                    404,
+                )
+            bar_possess = res[0]
+
+            cur.execute("SELECT * FROM bar_info ORDER BY bar_id")
+            bars = cur.fetchall()
+            if not bars:
+                logger.error("商城初始化错误")
+                return (
+                    jsonify({"message": "fail", "data": {}, "error": "商城初始化错误"}),
+                    500,
+                )
+
+            # 计算用户球杆资源情况
+            possess, npossess = [], []
+            for bar_row in bars:
+                bar_row = dict(bar_row)
+                bar_id = bar_row["bar_id"]
+                if (1 << (bar_id - 1)) & bar_possess:
+                    possess.append(bar_row)
+                else:
+                    npossess.append(bar_row)
+
+            logger.info("获取球杆信息成功")
+            return (
+                jsonify(
+                    {
+                        "message": "ok",
+                        "data": {"bar_possess": possess, "bar_npossess": npossess},
+                        "error": "",
+                    }
+                ),
+                200,
+            )
+    except sq.Error:
+        logger.exception("数据库服务异常")
+        return jsonify({"message": "fail", "data": {}, "error": "数据库服务异常"}), 500
 
 
-# 购买球杆接口
 @app.route("/api/auth/buy", methods=["POST"])
-def bar_buy():
-    """购买球杆"""
-    # 验证前端数据
-    data = request.get_json()
-    if not data:
-        print("前端传递空数据")
-        return jsonify({"message": "Fail", "data": {}}), 400
+def buy_bar():
+    """用户购买球杆"""
+    # 检查数据
     try:
-        user_id = int(data.get("user_id"))
-        bar_id = int(data.get("bar_id"))
-    except Exception as buy_error:
-        print(f"客户端传递无效数据:{buy_error}")
-        return jsonify({"message": "Fail", "data": {}}), 400
+        data = request.get_json()
+        if not data:
+            raise ValueError("客户端未传递数据")
+        user_id = data.get("user_id")
+        bar_id = data.get("bar_id")
+        if not user_id or not bar_id:
+            raise ValueError("用户id或球杆id为空")
+    except ValueError as buy_error:
+        logger.warning("购买失败: %s", buy_error)
+        return jsonify({"message": "fail", "data": {}, "error": "无效的请求"}), 400
 
-    # 后端执行操作
+    # 执行操作
     try:
         with sq.connect("starball.db") as conn:
             cur = conn.cursor()
+            # 检查用户id合法性
             cur.execute(
-                "SELECT coins, bar_number FROM user_info WHERE user_id = ?", (user_id,)
+                "SELECT coins, bar_possess FROM user_info WHERE user_id = ?", (user_id,)
             )
             res = cur.fetchone()
             if not res:
-                print("购买失败")
-                return jsonify({"message": "Fail", "data": {}}), 404
+                logger.info("购买失败, 用户%s不存在", user_id)
+                return (
+                    jsonify({"message": "fail", "data": {}, "error": "用户不存在"}),
+                    404,
+                )
             coins = res[0]
-            bar_number = res[1]
-            if bar_number & (1 << (bar_id - 1)):
-                print("不能重复购买")
-                return jsonify({"message": "Fail", "data": {}}), 409
+            bar_possess = res[1]
+
+            # 检查球杆id合法性
             cur.execute("SELECT price FROM bar_info WHERE bar_id = ?", (bar_id,))
             res = cur.fetchone()
             if not res:
-                print("购买失败")
-                return jsonify({"message": "Fail", "data": {}}), 404
+                logger.info("购买失败, 无效的球杆id:%s", bar_id)
+                return (
+                    jsonify({"message": "fail", "data": {}, "error": "球杆不存在"}),
+                    404,
+                )
             price = res[0]
 
-            if coins >= price:
-                coins = coins - price
-                bar_number = bar_number | (1 << (bar_id - 1))
-                cur.execute(
-                    "UPDATE user_info SET coins = ?, bar_number = ? WHERE user_id = ?",
-                    (coins, bar_number, user_id),
-                )
-                conn.commit()
-                print("购买成功")
+            # 检查购买操作合法性
+            if bar_possess & (1 << (bar_id - 1)) or coins < price:
+                logger.warning("已拥有当前球杆或余额不足")
                 return (
                     jsonify(
                         {
-                            "message": "Success",
-                            "data": {"coins": coins, "bar_number": bar_number},
+                            "message": "fail",
+                            "data": {},
+                            "error": "已拥有当前球杆或余额不足",
                         }
                     ),
-                    200,
+                    409,
                 )
-            print("购买失败")
-            return jsonify({"message": "Fail", "data": {}}), 400
-    except Exception as buy_error:
-        print(f"购买出错:{buy_error}")
-        return jsonify({"message": "Fail", "data": {}}), 500
+
+            # 购买成功
+            coins = coins - price
+            bar_possess = bar_possess | (1 << (bar_id - 1))
+            cur.execute(
+                "UPDATE user_info SET coins = ?, bar_possess = ? WHERE user_id = ?",
+                (coins, bar_possess, user_id),
+            )
+            conn.commit()
+            logger.info("购买成功")
+            return (
+                jsonify(
+                    {
+                        "message": "ok",
+                        "data": {"coins": coins, "bar_possess": bar_possess},
+                        "error": "",
+                    }
+                ),
+                200,
+            )
+    except sq.Error:
+        logger.exception("数据库服务异常")
+        return jsonify({"message": "fail", "data": {}, "error": "数据库服务异常"}), 500
 
 
+# 11.9优化
 # 用户创建房间
 @socketio.on("create_room")
 def create(data):
