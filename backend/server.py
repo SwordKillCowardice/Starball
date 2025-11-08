@@ -150,22 +150,24 @@ def register():
         return jsonify({"message": "fail", "data": {}, "error": "数据库服务异常"}), 500
 
 
-# 登录功能接口
+# 用户登录
 @app.route("/api/auth/login", methods=["POST"])
 def login():
     """处理登录逻辑"""
-    # 验证前端数据
-    data = request.get_json()
-    if not data:
-        print("客户端传递空数据")
-        return jsonify({"message": "Fail", "data": {}}), 400
-    user_name = data.get("user_name")
-    password = data.get("password")
-    if not user_name or not password:
-        print("客户端传递无效数据")
-        return jsonify({"message": "Fail", "data": {}}), 400
+    # 检查数据
+    try:
+        data = request.get_json()
+        if not data:
+            raise ValueError("客户端未传递数据")
+        user_name = data.get("user_name")
+        password = data.get("password")
+        if not user_name or not password:
+            raise ValueError("用户名或密码为空")
+    except ValueError as reg_error:
+        logger.warning("登录失败: %s", reg_error)
+        return jsonify({"message": "fail", "data": {}, "error": "无效的请求"}), 400
 
-    # 后端执行操作
+    # 执行操作
     try:
         with sq.connect("starball.db") as conn:
             cur = conn.cursor()
@@ -177,19 +179,28 @@ def login():
             if not res or not bcrypt.checkpw(
                 password.encode("utf-8"), res[1].encode("utf-8")
             ):
-                print("登录失败")
-                return jsonify({"message": "Fail", "data": {}}), 401
+                logger.info("登陆失败")
+                return (
+                    jsonify(
+                        {
+                            "message": "fail",
+                            "data": {},
+                            "error": "用户名不存在或密码错误",
+                        }
+                    ),
+                    401,
+                )
 
-            print("用户登录成功")
+            logger.info("登录成功")
             return (
                 jsonify(
-                    {"message": "Success", "data": {"user_id": res[0], "coins": res[2]}}
+                    {"message": "ok", "data": {"user_id": res[0], "coins": res[2]}}
                 ),
                 200,
             )
-    except Exception as login_error:
-        print(f"登录服务异常:{login_error}")
-        return jsonify({"message": "Fail", "data": {}}), 500
+    except sq.Error:
+        logger.exception("数据库服务异常")
+        return jsonify({"message": "fail", "data": {}, "error": "数据库服务异常"}), 500
 
 
 # 用户信息接口
