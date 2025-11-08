@@ -4,43 +4,92 @@
 
 # 导入所需模块
 import sqlite3 as sq
+import os
+import logging
+from logging.handlers import RotatingFileHandler
 import bcrypt
 from flask import Flask, request, jsonify
-from flask_socketio import SocketIO, emit, join_room, leave_room
+from flask_socketio import SocketIO, emit, join_room
 from flask_cors import CORS
 
-# 创建Web服务对象，并支持跨域访问, 实时通信
-user_sockets = {}
+# 创建Web实体，支持跨域访问，开启实时通信，记录通信对象
 app = Flask(__name__)
-socketio = SocketIO(app)
 CORS(app)
+socketio = SocketIO(app, cors_allowed_origins="*")
+user_sockets = {}
+
+# 创建日志文件夹，定义日志文件路径
+LOG_DIR = "logs"
+if not os.path.exists(LOG_DIR):
+    os.makedirs(LOG_DIR)
+LOG_FILE = os.path.join(LOG_DIR, "starball.log")
+
+# 创建Logger对象，并设置日志等级过滤，设置日志格式
+logger = logging.getLogger("my_app")
+logger.setLevel(logging.DEBUG)
+formatter = logging.Formatter(
+    "%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s"
+)
+
+# 设置输出到控制台的日志：级别过滤、格式
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.DEBUG)
+console_handler.setFormatter(formatter)
+logger.addHandler(console_handler)
+
+# 设置输出到滚动文件的日志：大小、数量、级别过滤、格式
+file_handler = RotatingFileHandler(LOG_FILE, maxBytes=5 * 1024 * 1024, backupCount=5)
+file_handler.setLevel(logging.INFO)
+file_handler.setFormatter(formatter)
+logger.addHandler(file_handler)
 
 
 # 数据库初始化
 def initialize_table():
     """创建数据库，建立表格"""
     with sq.connect("starball.db") as conn:
+        conn.execute("PRAGMA foreign_keys = ON")
         cur = conn.cursor()
+
+        # 创建用户信息表
         cur.execute(
             """CREATE TABLE IF NOT EXISTS user_info (
             user_id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_name TEXT NOT NULL UNIQUE,
             password_hash TEXT NOT NULL,
-            coins INTEGER NOT NULL DEFAULT 0,
+            coins INTEGER NOT NULL DEFAULT 300,
             total_games INTEGER NOT NULL DEFAULT 0,
             win_games INTEGER NOT NULL DEFAULT 0,
             win_rate REAL NOT NULL DEFAULT -1,
             bar_possess INTEGER NOT NULL DEFAULT 1,
             picture TEXT NOT NULL DEFAULT "")"""
         )
-        # 残留1：头像字段存储问题
+
+        # 创建球杆信息表并初始化
         cur.execute(
             """CREATE TABLE IF NOT EXISTS bar_info (
             bar_id INTEGER PRIMARY KEY AUTOINCREMENT,
             bar_name TEXT NOT NULL UNIQUE,
             price INTEGER NOT NULL)"""
         )
-        # 残留2：球杆价格问题
+        cur.execute("SELECT COUNT(*) FROM bar_info")
+        res = cur.fetchone()[0]
+        if not res:
+            bar_data = [
+                ("极速球杆", 520),
+                ("力量球杆", 880),
+                ("精准球杆", 310),
+                ("影刃球杆", 760),
+                ("天命球杆", 450),
+                ("雷霆球杆", 210),
+                ("幻影球杆", 980),
+                ("霸王球杆", 600),
+            ]
+            cur.executemany(
+                "INSERT INTO bar_info (bar_name, price) VALUES (?, ?)", bar_data
+            )
+
+        # 创建对局信息表
         cur.execute(
             """CREATE TABLE IF NOT EXISTS room_info(
             room_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -48,35 +97,41 @@ def initialize_table():
             player2_id INTEGER,
             state INTEGER NOT NULL DEFAULT 0,
             FOREIGN KEY (player1_id) REFERENCES user_info(user_id),
-    FOREIGN KEY (player2_id) REFERENCES user_info(user_id))"""
+            FOREIGN KEY (player2_id) REFERENCES user_info(user_id))"""
         )
         conn.commit()
 
 
-# 注册功能接口
+# 用户注册
 @app.route("/api/auth/register", methods=["POST"])
 def register():
     """处理注册逻辑"""
-    # 验证前端数据
-    data = request.get_json()
-    if not data:
-        print("客户端传递空数据")
-        return jsonify({"message": "Fail", "data": {}}), 400
-    user_name = data.get("user_name")
-    password_plain = data.get("password")
-    if not user_name or not password_plain:
-        print("客户端传递无效数据")
-        return jsonify({"message": "Fail", "data": {}}), 400
+    # 检查数据
+    try:
+        data = request.get_json()
+        if not data:
+            raise ValueError("客户端未传递数据")
+        user_name = data.get("user_name")
+        password_plain = data.get("password")
+        if not user_name or not password_plain:
+            raise ValueError("用户名或密码为空")
+    except ValueError as reg_error:
+        logger.warning("注册失败: %s", reg_error)
+        return jsonify({"message": "fail", "data": {}, "error": "无效的请求"}), 400
 
-    # 后端执行操作
+    # 执行操作
     try:
         with sq.connect("starball.db") as conn:
             cur = conn.cursor()
-            cur.execute("SELECT 1 FROM user_info WHRER user_name = ?", (user_name,))
+            cur.execute("SELECT 1 FROM user_info WHERE user_name = ?", (user_name,))
             if cur.fetchone():
-                print("用户名已被占用")
-                return jsonify({"message": "Fail", "data": {}}), 409
+                logger.info("用户名已被占用")
+                return (
+                    jsonify({"message": "fail", "data": {}, "error": "用户名已被占用"}),
+                    409,
+                )
 
+            # 注册合法时执行加密，并插入表格
             raw = password_plain.encode("utf-8")
             password_hash = bcrypt.hashpw(raw, bcrypt.gensalt()).decode("utf-8")
             cur.execute(
@@ -85,16 +140,14 @@ def register():
             )
             conn.commit()
             user_id = cur.lastrowid
-            print("注册成功")
+            logger.info("用户%s注册成功", user_name)
             return (
-                jsonify(
-                    {"message": "Success", "data": {"user_id": user_id, "coins": 0}}
-                ),
+                jsonify({"message": "ok", "data": {"user_id": user_id, "coins": 300}}),
                 201,
             )
-    except Exception as register_error:
-        print(f"注册服务异常:{register_error}")
-        return jsonify({"message": "Fail", "data": {}}), 500
+    except sq.Error:
+        logger.exception("数据库服务异常")
+        return jsonify({"message": "fail", "data": {}, "error": "数据库服务异常"}), 500
 
 
 # 登录功能接口
