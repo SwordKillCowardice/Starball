@@ -1,0 +1,21 @@
+.main-menu {
+    justify-content: center;
+    align-items: flex-end;
+    /* 靠下对齐 */
+    height: 100%;
+    width: 100%;
+    /* 占满整个屏幕高度 */
+    overflow: hidden;
+}
+
+.avatar-container {
+    position: absolute;
+    /* 让容器脱离普通布局，固定在页面上 */
+    top: 60px;
+    /* 距离顶部 60px */
+    left: 200px;
+    /* 距离左边 20px */
+    z-index: 10;
+    /* 确保在背景图之上 */
+}
+

@@ -1,0 +1,47 @@
+.coins-container {
+    position: fixed;
+    top: 60px;
+    right: 200px;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 40px;
+}
+
+.coin-circle {
+    max-width: 48px;
+    max-height: 48px;
+    background-color: gold;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.coin-number {
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    min-width: 40px;
+    text-align: center;
+}
+
+.coin-plus {
+    max-width: 32px;
+    max-height: 32px;
+    background-color: #4CAF50;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.coin-plus:hover {
+    background-color: #2f7c33;
+}

@@ -1,0 +1,69 @@
+.main-menu {
+    justify-content: center;
+    align-items: flex-end;
+    /* 靠下对齐 */
+    height: 100%;
+    width: 100%;
+    /* 占满整个屏幕高度 */
+    overflow: hidden;
+}
+
+.avatar-container {
+    position: absolute;
+    /* 让容器脱离普通布局，固定在页面上 */
+    top: 60px;
+    /* 距离顶部 60px */
+    left: 200px;
+    /* 距离左边 20px */
+    z-index: 10;
+    /* 确保在背景图之上 */
+}
+
+.cue-carousel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-y: auto;
+    gap: 20px;
+    padding: 20px;
+    scroll-behavior: smooth;
+
+    /* 移除 absolute / fixed */
+    position: relative;
+    width: 100%;
+    max-height: 40vh;
+    /* 控制滚动区高度 */
+    border-radius: 12px;
+    text-align: center;
+    color: white;
+}
+
+.cue-card {
+    display: flex;
+    /* 启用 Flex 布局 */
+    flex-direction: column;
+    align-items: center;
+    /* 垂直居中 */
+    width: 800px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    padding: 16px;
+    text-align: center;
+    color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(4px);
+    transition: transform 0.3s;
+}
+
+.cue-card:hover {
+    transform: scale(1.05);
+}
+
+.cue-image {
+    width: 100%;
+    height: 140px;
+    object-fit: contain;
+    margin-bottom: 10px;
+    border-radius: 12px;
+}
