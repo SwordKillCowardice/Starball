@@ -392,105 +392,153 @@ def buy_bar():
         return jsonify({"message": "fail", "data": {}, "error": "数据库服务异常"}), 500
 
 
-# 11.9优化
-# 用户创建房间
-@socketio.on("create_room")
-def create(data):
+@app.route("/api/room/create", methods=["POST"])
+def create_room():
     """用户创建房间"""
-    if not data:
-        print("前端传递空数据")
-        emit("Fail", {"detail": "空数据", "room_id": None})
-        return
+    # 检查数据
     try:
-        user_id = int(data.get("user_id"))
-    except Exception as create_error:
-        print(f"前端传递无效数据:{create_error}")
-        emit("Fail", {"detail": "无效数据", "room_id": None})
-        return
+        data = request.get_json()
+        if not data:
+            raise ValueError("客户端未传递数据")
+        user_id = data.get("user_id")
+        if not user_id:
+            raise ValueError("用户id为空")
+    except ValueError as crt_error:
+        logger.warning("创建房间失败: %s", crt_error)
+        return jsonify({"message": "fail", "data": {}, "error": "无效的请求"}), 400
 
-    # 后端执行操作
+    # 执行操作
     try:
         with sq.connect("starball.db") as conn:
             cur = conn.cursor()
+            cur.execute("SELECT 1 FROM user_info WHERE user_id = ?", (user_id,))
+            res = cur.fetchone()
+            if not res:
+                logger.warning("不存在的用户%s试图创建房间", user_id)
+                return (
+                    jsonify({"message": "fail", "data": {}, "error": "无效的请求"}),
+                    404,
+                )
+
             cur.execute(
-                """SELECT room_id FROM room_info WHERE (player1_id = ? OR player2_id = ?) AND state <> 2""",
+                """SELECT room_id FROM room_info WHERE (player1_id = ? OR player2_id = ?)
+                AND state <> 2""",
                 (user_id, user_id),
             )
             res = cur.fetchone()
             if res:
-                print("房间创建失败")
-                emit("Fail", {"detail": "玩家已在房间中", "room_id": None})
-                return
+                logger.info("房间创建失败")
+                return (
+                    jsonify(
+                        {"message": "fail", "data": {}, "error": "用户有尚未退出的房间"}
+                    ),
+                    409,
+                )
+
             cur.execute("""INSERT INTO room_info (player1_id) VALUES (?)""", (user_id,))
             conn.commit()
             room_id = cur.lastrowid
-            old_sid = user_sockets.get(user_id)
-            if old_sid:
-                user_sockets.pop(user_id, None)
-            user_sockets[user_id] = request.sid
-            join_room(str(room_id))
-            print("房间创建成功")
-            emit("Success", {"detail": "创建成功", "room_id": room_id})
-            return
-    except Exception as create_error:
-        print(f"创建房间失败:{create_error}")
-        emit("Fail", {"detail": "服务器错误", "room_id": None})
-        return
+            logger.info("房间创建成功")
+            return (
+                jsonify({"message": "ok", "data": {"room_id": room_id}, "error": ""}),
+                200,
+            )
+    except sq.Error:
+        logger.exception("数据库服务异常")
+        return jsonify({"message": "fail", "data": {}, "error": "数据库服务异常"}), 500
 
 
-# 用户进入房间
-@socketio.on("join_room")
-def join(data):
-    """用户进入房间"""
-    if not data:
-        print("前端传递空数据")
-        emit("Fail", {"detail": "空数据"})
-        return
+@app.route("/api/room/join", methods=["POST"])
+def join_later():
+    """非创建者进入房间"""
+    # 检查数据
     try:
-        user_id = int(data.get("user_id"))
-        room_id = int(data.get("room_id"))
-    except Exception as create_error:
-        print(f"前端传递无效数据:{create_error}")
-        emit("Fail", {"detail": "无效数据"})
+        data = request.get_json()
+        if not data:
+            raise ValueError("客户端未传递数据")
+        user_id = data.get("user_id")
+        room_id = data.get("room_id")
+        if not user_id or not room_id:
+            raise ValueError("用户id或房间id为空")
+    except ValueError as join_error:
+        logger.warning("进入房间失败: %s", join_error)
+        return jsonify({"message": "fail", "error": "无效的请求"}), 400
+
+    # 执行操作
+    try:
+        with sq.connect("starball.db") as conn:
+            cur = conn.cursor()
+            cur.execute("SELECT 1 FROM user_info WHERE user_id = ?", (user_id,))
+            if not cur.fetchone():
+                logger.warning("不存在的用户%s尝试进入房间", user_id)
+                return jsonify({"message": "fail", "error": "无效的请求"}), 404
+            cur.execute(
+                "SELECT player2_id, state FROM room_info WHERE room_id = ?", (room_id,)
+            )
+            res = cur.fetchone()
+            if not res or res[0] or res[1] != 0:
+                logger.warning("房间不存在或者已满")
+                return jsonify({"message": "fail", "error": "无效的请求"}), 404
+            cur.execute(
+                "UPDATE room_info SET player2_id = ?, state = 1 WHERE room_id = ?",
+                (user_id, room_id),
+            )
+            conn.commit()
+            logger.info("进入房间成功")
+            return jsonify({"message": "ok", "error": ""}), 200
+    except sq.Error:
+        logger.exception("数据库服务异常")
+        return jsonify({"message": "fail", "data": {}, "error": "数据库服务异常"}), 500
+
+
+@socketio.on("join_room")
+def handle_join_room(data):
+    """用户进入房间，进行播报"""
+    # 检查数据
+    try:
+        if not data:
+            raise ValueError("客户端未传递数据")
+        user_id = data.get("user_id")
+        room_id = data.get("room_id")
+        if not user_id or not room_id:
+            raise ValueError("用户id或房间id为空")
+    except ValueError as join_error:
+        logger.warning("进入房间失败: %s", join_error)
+        emit("fail", {"error": "无效的请求"})
         return
 
-    # 执行后端操作
+    # 执行操作
     try:
         with sq.connect("starball.db") as conn:
             cur = conn.cursor()
             cur.execute(
-                "SELECT player2_id FROM room_info WHERE room_id = ?", (room_id,)
+                """SELECT room_id, player1_id, player2_id FROM room_info WHERE room_id = ? AND
+                (player1_id = ? OR player2_id = ?) AND state <> 2""",
+                (room_id, user_id, user_id),
             )
-            res = cur.fetchone()
-            if not res or res[0]:
-                print("房间进入失败")
-                emit("Fail", {"detail": "房间不存在或已满员"})
-                return
-            cur.execute("SELECT 1 FROM user_info WHERE user_id = ?", (user_id,))
             res = cur.fetchone()
             if not res:
-                print("房间进入失败")
-                emit("Fail", {"detail": "用户不合法"})
+                logger.warning("用户不存在或者房间不存在")
+                emit("fail", {"error": "无效的请求"})
                 return
-            cur.execute(
-                "UPDATE room_info SET player2_id = ?, state = ? WHERE room_id = ?",
-                (user_id, 1, room_id),
-            )
-            conn.commit()
+            player1, player2 = res[1], res[2]
+
             join_room(room_id)
-            print("进入房间成功")
-            emit(
-                "player_joined", {"user_id": user_id}, room=room_id, include_self=False
-            )
-            old_sid = user_sockets.get(user_id)
-            if old_sid:
-                user_sockets.pop(user_id, None)
             user_sockets[user_id] = request.sid
-            emit("Success", {"detail": "加入成功"})
+            if user_id == player1:
+                logger.info("房间%s创建者%s加入房间", room_id, player1)
+                emit("ok", {"room_id": room_id})
+                return
+            logger.info("玩家%s加入房间, 游戏正式开始", player2)
+            emit(
+                "game start",
+                {"player1_id": player1, "player2_id": player2, "room_id": room_id},
+                room=room_id,
+            )
             return
-    except Exception as join_error:
-        print("进入房间服务异常")
-        emit("Fail", {"detail": "进入房间服务异常"})
+    except sq.Error:
+        logger.exception("数据库服务异常")
+        emit("fail", {"error": "数据库服务异常"})
         return
 
 
