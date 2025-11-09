@@ -542,139 +542,114 @@ def handle_join_room(data):
         return
 
 
-# 用户击球
-@socketio.on("strike")
-def strike(data):
-    """传递用户击球数据"""
-    if not data:
-        print("传递空数据")
-        emit("Fail", {"detail": "前端传递数据为空"})
-        return
+@socketio.on("shoot")
+def shoot(data):
+    """用户击球"""
+    # 检查数据
     try:
-        user_id = int(data.get("user_id"))
-        angle = float(data.get("angle"))
-        power = float(data.get("power"))
-        if angle < 0 or power < 0:
-            raise Exception("无效数据")
-    except Exception as strike_error:
-        print(f"传递无效数据:{strike_error}")
-        emit("Fail", {"detail": "前端传递数据无效"})
+        if not data:
+            raise ValueError("客户端未传递数据")
+        user_id = data.get("user_id")
+        angle = data.get("angle")
+        power = data.get("power")
+        if (
+            not user_id
+            or angle is None
+            or power is None
+            or not (0 <= angle <= 360 and 0 <= power <= 100)
+        ):
+            raise ValueError("无效的请求")
+    except ValueError as shoot_error:
+        logger.warning("传递击球数据失败: %s", shoot_error)
+        emit("fail", {"error": "无效的请求"})
         return
 
+    # 执行操作
     try:
         with sq.connect("starball.db") as conn:
             cur = conn.cursor()
             cur.execute(
-                "SELECT player1_id, player2_id FROM room_info WHERE (player1_id = ? OR player2_id = ?) AND state = 1",
+                """SELECT player1_id, player2_id FROM room_info WHERE
+                (player1_id = ? OR player2_id = ?) AND state = 1""",
                 (user_id, user_id),
             )
             res = cur.fetchone()
             if not res:
-                emit("Fail", {"detail": "用户不存在"})
-                print("失败")
-                return
-            if not res[0]:
-                emit("Fail", {"detail": "对局尚未开始"})
-                print("失败")
+                logger.warning("用户%s发出异常请求", user_id)
+                emit("fail", {"error": "异常请求"})
                 return
             if res[0] == user_id:
                 target = res[1]
             else:
                 target = res[0]
-            print("发送成功")
+            logger.info("击球数据发送成功")
             emit(
-                "Hit ball",
-                {"detail": "对方击球", "angle": angle, "power": power},
+                "opponent_hit",
+                {"angle": angle, "power": power},
                 to=user_sockets[target],
             )
+            emit("shoot_success")
             return
-    except Exception as hit_error:
-        print(f"传递数据错误:{hit_error}")
+    except sq.Error:
+        logger.exception("数据库服务异常")
+        emit("fail", {"error": "数据库服务异常"})
         return
 
 
-# 击球玩家发送计算结果
-@socketio.on("pos")
-def check(data):
-    """传递计算结果"""
-    if not data:
-        print("传递空数据")
-        emit("Fail", {"detail": "前端传递数据为空"})
-        return
+@socketio.on("send_pos")
+def send_pos(data):
+    """传递击球方得到的球的位置"""
+    # 检查数据
     try:
-        user_id = int(data.get("user_id"))
-        ball_pos = data.get("balls")
-        if not ball_pos:
-            raise Exception("错误")
-    except Exception as strike_error:
-        print(f"传递无效数据:{strike_error}")
-        emit("Fail", {"detail": "前端传递数据无效"})
+        if not data:
+            raise ValueError("客户端未传递数据")
+        user_id = data.get("user_id")
+        balls = data.get("balls", [])
+        error = False
+        if not balls:
+            raise ValueError("无效的请求")
+        for ball in balls:
+            ball_id = ball["ball_id"]
+            # ball_posx = ball["ball_posx"]
+            # ball_posy = ball["ball_posy"]
+            # 球位置的检查等待和游戏模块沟通
+            if not 0 <= ball_id <= 21:
+                error = True
+                break
+        if not user_id or error:
+            raise ValueError("无效的请求")
+    except ValueError as pos_error:
+        logger.warning("传递位置数据失败: %s", pos_error)
+        emit("fail", {"error": "无效的请求"})
         return
+
+    # 执行操作
     try:
         with sq.connect("starball.db") as conn:
             cur = conn.cursor()
             cur.execute(
-                "SELECT player1_id, player2_id FROM room_info WHERE (player1_id = ? OR player2_id = ?) AND state = 1",
+                """SELECT player1_id, player2_id FROM room_info WHERE
+                (player1_id = ? OR player2_id = ?) AND state = 1""",
                 (user_id, user_id),
             )
             res = cur.fetchone()
             if not res:
-                emit("Fail", {"detail": "用户不存在"})
-                print("失败")
-                return
-            if not res[0]:
-                emit("Fail", {"detail": "对局尚未开始"})
-                print("失败")
+                logger.warning("用户%s发出异常请求", user_id)
+                emit("fail", {"error": "异常请求"})
                 return
             if res[0] == user_id:
                 target = res[1]
             else:
                 target = res[0]
-            print("发送成功")
+            logger.info("位置数据发送成功")
             emit(
-                "pos",
-                {"detail": "计算结果", "ball_pos": ball_pos},
+                "opponent_pos",
+                {"balls": balls},
                 to=user_sockets[target],
             )
+            emit("send_success")
             return
-    except Exception as hit_error:
-        print(f"传递数据错误:{hit_error}")
+    except sq.Error:
+        logger.exception("数据库服务异常")
+        emit("fail", {"error": "数据库服务异常"})
         return
-
-
-# 确认下一次击球开始
-@socketio.on("next_hit")
-def next_hit(data):
-    """下一次击球"""
-    if not data:
-        print("传递空数据")
-        emit("Fail", {"detail": "前端传递数据为空"})
-        return
-    try:
-        user_id = int(data.get("user_id"))
-    except Exception as strike_error:
-        print(f"传递无效数据:{strike_error}")
-        emit("Fail", {"detail": "前端传递数据无效"})
-        return
-
-    try:
-        with sq.connect("starball.db") as conn:
-            cur = conn.cursor()
-            cur.execute(
-                "SELECT room_id FROM room_info WHERE (player1_id = ? OR player2_id = ?) AND state = 1",
-                (user_id, user_id),
-            )
-            res = cur.fetchone()
-            if not res:
-                print("无房间")
-                return
-            room_id = res[0]
-            print("数据发送成功")
-            emit(f"{user_id}hit", {"detail": "交换球权"}, room=room_id)
-    except Exception as e:
-        return
-
-
-if __name__ == "__main__":
-    initialize_table()
-    socketio.run(app, host="0.0.0.0", port=5000, debug=True)
