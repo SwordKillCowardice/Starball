@@ -1,0 +1,43 @@
+.cue-carousel {
+    display: flex;
+    overflow-x: auto;
+    /* 横向滚动 */
+    gap: 20px;
+    /* 卡片间距 */
+    padding: 20px;
+    scroll-behavior: smooth;
+    /* 平滑滚动 */
+}
+
+.cue-card {
+    flex: 0 0 auto;
+    /* 不换行，保持横向排列 */
+    display: flex;
+    /* 启用 Flex 布局 */
+    flex-direction: column;
+    /* 垂直排列元素 */
+    align-items: center;
+    /* 水平居中 */
+    width: 200px;
+    height: 600px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    padding: 16px;
+    text-align: center;
+    color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(4px);
+    transition: transform 0.3s;
+}
+
+.cue-card:hover {
+    transform: scale(1.05);
+}
+
+.cue-image {
+    width: 100%;
+    height: 140px;
+    object-fit: contain;
+    margin-bottom: 10px;
+    border-radius: 12px;
+}

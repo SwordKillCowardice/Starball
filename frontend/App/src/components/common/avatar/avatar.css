@@ -1,0 +1,154 @@
+:root {
+    --avatar-size: 64px;
+    --avatar-gap: 20px;
+    --avatar-accent: #00c8ff;
+    --avatar-muted: #00e1ff;
+    --avatar-bg: #f3f4f6;
+}
+
+/* 容器：头像在左、信息在右，中间间隔20px */
+.avatar {
+    display: flex;
+    align-items: center;
+    gap: var(--avatar-gap);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    color: #111827;
+    margin-top: 0px;
+    margin-left: 0px;
+}
+
+/* 头像容器 */
+.avatar__photo {
+    width: var(--avatar-size);
+    height: var(--avatar-size);
+    flex: 0 0 var(--avatar-size);
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--avatar-bg);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 2px rgba(16,24,40,0.04);
+}
+
+/* 图片样式（适用于内部 img 元素） */
+.avatar__photo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* 占位头像：显示首字母或图标的样式 */
+.avatar__placeholder {
+    width: 100%;
+    height: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 600;
+    font-size: calc(var(--avatar-size) / 2.6);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* 用户信息容器：包含姓名、等级与次要信息 */
+.avatar__info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0; /* 防止内容溢出 */
+}
+
+/* 姓名（主标题） */
+.avatar__name {
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color:rgb(0, 153, 255); 
+}
+
+/* 次要信息：等级、标签等小元素 */
+.avatar__meta {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    color: var(--avatar-muted);
+    font-size: 0.875rem;
+}
+
+/* 等级标签样式 */
+.avatar__level {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 8px;
+    background: rgba(79,70,229,0.08);
+    color: var(--avatar-accent);
+    font-weight: 600;
+    font-size: 0.75rem;
+    border-radius: 999px;
+}
+
+/* 较小的辅助文字样式 */
+.avatar__subtle {
+    color: var(--avatar-muted);
+    font-size: 0.85rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 小/大尺寸变体（覆盖头像尺寸） */
+.avatar--sm .avatar__photo {
+    width: 40px;
+    height: 40px;
+    flex-basis: 40px;
+}
+.avatar--lg .avatar__photo {
+    width: 96px;
+    height: 96px;
+    flex-basis: 96px;
+}
+
+/* 响应式：窄屏时头像与信息垂直堆叠 */
+@media (max-width: 420px) {
+    .avatar {
+        gap: 12px;
+    }
+    .avatar--stack-sm {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    .avatar--stack-sm .avatar__info {
+        align-items: center;
+    }
+}
+
+/* 头像位置：默认左侧。添加 .avatar--right 将头像置于右侧（row-reverse） */
+.avatar--right {
+    flex-direction: row-reverse;
+}
+
+/* 右侧布局时，使信息右对齐并将信息容器靠近头像 */
+.avatar--right .avatar__info {
+    text-align: right;
+    align-items: flex-end;
+}
+
+/* 在小屏垂直堆叠时，优先居中显示（选择器优先级高于单独的 .avatar--stack-sm） */
+@media (max-width: 420px) {
+    .avatar--right.avatar--stack-sm {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .avatar--right.avatar--stack-sm .avatar__info {
+        align-items: center;
+    }
+}
