@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 """实现台球游戏的服务器端"""
 
 # 导入所需模块
@@ -16,6 +14,7 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
+
 user_sockets = {}
 
 # 创建日志文件夹，定义日志文件路径
