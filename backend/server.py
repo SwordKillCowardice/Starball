@@ -653,3 +653,8 @@ def send_pos(data):
         logger.exception("数据库服务异常")
         emit("fail", {"error": "数据库服务异常"})
         return
+
+
+if __name__ == "__main__":
+    initialize_table()
+    socketio.run(app, host="0.0.0.0", port=5000, debug=True)
