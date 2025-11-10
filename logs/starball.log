@@ -10,3 +10,57 @@
 2025-11-10 16:27:14,152 - my_app - INFO - server.py:142 - 用户048946注册成功
 2025-11-10 16:27:41,769 - my_app - INFO - server.py:142 - 用户0413584注册成功
 2025-11-10 16:28:18,923 - my_app - INFO - server.py:142 - 用户1644534注册成功
+2025-11-10 19:44:34,987 - my_app - INFO - server.py:125 - 用户名已被占用
+2025-11-10 19:45:03,667 - my_app - INFO - server.py:125 - 用户名已被占用
+2025-11-10 19:45:31,567 - my_app - INFO - server.py:140 - 用户1645注册成功
+2025-11-10 19:45:36,906 - my_app - WARNING - server.py:219 - 获取用户信息失败: int() argument must be a string, a bytes-like object or a real number, not 'NoneType'
+2025-11-10 19:47:43,007 - my_app - INFO - server.py:125 - 用户名已被占用
+2025-11-10 19:47:51,109 - my_app - INFO - server.py:140 - 用户1665注册成功
+2025-11-10 19:47:54,849 - my_app - WARNING - server.py:219 - 获取用户信息失败: int() argument must be a string, a bytes-like object or a real number, not 'NoneType'
+2025-11-10 19:49:19,756 - my_app - INFO - server.py:140 - 用户1注册成功
+2025-11-10 19:49:21,936 - my_app - WARNING - server.py:219 - 获取用户信息失败: int() argument must be a string, a bytes-like object or a real number, not 'NoneType'
+2025-11-10 19:51:04,405 - my_app - INFO - server.py:140 - 用户2注册成功
+2025-11-10 19:51:06,463 - my_app - WARNING - server.py:219 - 获取用户信息失败: int() argument must be a string, a bytes-like object or a real number, not 'NoneType'
+2025-11-10 19:54:34,090 - my_app - INFO - server.py:140 - 用户665注册成功
+2025-11-10 19:54:35,865 - my_app - WARNING - server.py:219 - 获取用户信息失败: int() argument must be a string, a bytes-like object or a real number, not 'NoneType'
+2025-11-10 20:00:25,815 - my_app - INFO - server.py:140 - 用户6168注册成功
+2025-11-10 20:00:27,756 - my_app - WARNING - server.py:219 - 获取用户信息失败: int() argument must be a string, a bytes-like object or a real number, not 'NoneType'
+2025-11-10 20:00:55,500 - my_app - INFO - server.py:140 - 用户668348316注册成功
+2025-11-10 20:00:56,670 - my_app - INFO - server.py:242 - 用户5获取信息成功
+2025-11-10 20:02:41,824 - my_app - INFO - server.py:140 - 用户19641683注册成功
+2025-11-10 20:02:44,008 - my_app - INFO - server.py:242 - 用户6获取信息成功
+2025-11-10 20:05:02,550 - my_app - INFO - server.py:140 - 用户21641注册成功
+2025-11-10 20:05:03,973 - my_app - INFO - server.py:242 - 用户7获取信息成功
+2025-11-10 20:12:22,587 - my_app - INFO - server.py:140 - 用户1注册成功
+2025-11-10 20:12:25,713 - my_app - INFO - server.py:242 - 用户1获取信息成功
+2025-11-10 20:12:35,785 - my_app - INFO - server.py:196 - 登录成功
+2025-11-10 20:12:37,947 - my_app - INFO - server.py:242 - 用户1获取信息成功
+2025-11-10 20:12:45,822 - my_app - INFO - server.py:125 - 用户名已被占用
+2025-11-10 20:13:44,687 - my_app - INFO - server.py:125 - 用户名已被占用
+2025-11-10 20:13:49,010 - my_app - INFO - server.py:184 - 登陆失败
+2025-11-10 20:14:42,188 - my_app - INFO - server.py:140 - 用户2注册成功
+2025-11-10 20:14:44,729 - my_app - INFO - server.py:242 - 用户2获取信息成功
+2025-11-10 20:14:51,412 - my_app - INFO - server.py:196 - 登录成功
+2025-11-10 20:14:53,101 - my_app - INFO - server.py:242 - 用户2获取信息成功
+2025-11-10 20:14:59,317 - my_app - INFO - server.py:184 - 登陆失败
+2025-11-10 20:15:04,684 - my_app - INFO - server.py:125 - 用户名已被占用
+2025-11-10 20:15:13,731 - my_app - INFO - server.py:196 - 登录成功
+2025-11-10 20:15:15,241 - my_app - INFO - server.py:242 - 用户2获取信息成功
+2025-11-10 20:17:25,522 - my_app - INFO - server.py:196 - 登录成功
+2025-11-10 20:17:28,036 - my_app - INFO - server.py:242 - 用户2获取信息成功
+2025-11-10 20:46:11,239 - my_app - INFO - server.py:125 - 用户名已被占用
+2025-11-10 20:46:13,362 - my_app - INFO - server.py:196 - 登录成功
+2025-11-10 20:46:15,591 - my_app - ERROR - server.py:254 - 数据库服务异常
+Traceback (most recent call last):
+  File "d:\Starball\backend\server.py", line 227, in get_user_info
+    cur.execute(
+sqlite3.OperationalError: no such column: head
+2025-11-10 20:46:18,597 - my_app - INFO - server.py:196 - 登录成功
+2025-11-10 20:46:19,213 - my_app - ERROR - server.py:254 - 数据库服务异常
+Traceback (most recent call last):
+  File "d:\Starball\backend\server.py", line 227, in get_user_info
+    cur.execute(
+sqlite3.OperationalError: no such column: head
+2025-11-10 20:48:05,521 - my_app - INFO - server.py:184 - 登陆失败
+2025-11-10 20:48:06,950 - my_app - INFO - server.py:140 - 用户2注册成功
+2025-11-10 20:48:08,451 - my_app - INFO - server.py:251 - 用户1获取信息成功

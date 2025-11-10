@@ -58,9 +58,8 @@ def initialize_table():
             coins INTEGER NOT NULL DEFAULT 300,
             total_games INTEGER NOT NULL DEFAULT 0,
             win_games INTEGER NOT NULL DEFAULT 0,
-            win_rate REAL NOT NULL DEFAULT -1,
             bar_possess INTEGER NOT NULL DEFAULT 1,
-            picture TEXT NOT NULL DEFAULT "")"""
+            head TEXT NOT NULL DEFAULT "")"""
         )
 
         # 创建球杆信息表并初始化
@@ -68,7 +67,8 @@ def initialize_table():
             """CREATE TABLE IF NOT EXISTS bar_info (
             bar_id INTEGER PRIMARY KEY AUTOINCREMENT,
             bar_name TEXT NOT NULL UNIQUE,
-            price INTEGER NOT NULL)"""
+            price INTEGER NOT NULL,
+            bar_picture TEXT NOT NULL DEFAULT "")"""
         )
         cur.execute("SELECT COUNT(*) FROM bar_info")
         res = cur.fetchone()[0]
@@ -225,7 +225,7 @@ def get_user_info():
             conn.row_factory = sq.Row
             cur = conn.cursor()
             cur.execute(
-                "SELECT coins, bar_possess, total_games, win_games, win_rate, picture "
+                "SELECT bar_possess, coins, total_games, win_games, head "
                 "FROM user_info WHERE user_id = ?",
                 (user_id,),
             )
@@ -238,9 +238,18 @@ def get_user_info():
                     jsonify({"message": "fail", "data": {}, "error": "获取信息失败"}),
                     404,
                 )
-
+            bar_possess = res["bar_possess"]
+            basic_info = {k: res[k] for k in res.keys() if k != "bar_possess"}
+            cur.execute("SELECT * FROM bar_info ORDER BY bar_id")
+            bars = cur.fetchall()
+            possess = []
+            for bar_row in bars:
+                bar_row = dict(bar_row)
+                bar_id = bar_row["bar_id"]
+                if (1 << (bar_id - 1)) & bar_possess:
+                    possess.append(bar_row)
             logger.info("用户%s获取信息成功", user_id)
-            return jsonify({"message": "ok", "data": dict(res), "error": ""}), 200
+            return jsonify({"message": "ok", "data": basic_info | {"bar_possess": possess}, "error": ""}), 200
     except sq.Error:
         logger.exception("数据库服务异常")
         return jsonify({"message": "fail", "data": {}, "error": "数据库服务异常"}), 500
