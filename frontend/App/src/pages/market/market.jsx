@@ -4,30 +4,60 @@ import Coins from '../../components/common/coins/coins.jsx';
 import './market.css';
 import Bg from '../../components/layout/bg';
 import CueCarousel from '../../components/common/CueCarousel/CueCarousel.jsx';
+import { useNavigate } from 'react-router-dom';
+import { HandleBuy } from '../../api/market.js';
 
-const cues = [
-    { id: 1, name: '红心球杆', image: '../../assets/cue1.png', power: 80, accuracy: 70, price: 1000 },
-    { id: 2, name: '蓝焰球杆', image: '../../assets/cue2.png', power: 90, accuracy: 65, price: 1500 },
-    { id: 3, name: '黄金球杆', image: '../../assets/cue3.png', power: 100, accuracy: 80, price: 2000 },
-    { id: 4, name: '白银球杆', image: '../../assets/cue4.png', power: 70, accuracy: 85, price: 1200 },
-    { id: 5, name: '黑曜石球杆', image: '../../assets/cue5.png', power: 95, accuracy: 90, price: 2500 },
-    { id: 6, name: '碳纤维球杆', image: '../../assets/cue6.png', power: 85, accuracy: 75, price: 1800 },
-    { id: 7, name: '钻石球杆', image: '../../assets/cue7.png', power: 110, accuracy: 95, price: 3000 },
-    { id: 8, name: '紫电球杆', image: '../../assets/cue8.png', power: 88, accuracy: 78, price: 1600 },
-    { id: 9, name: '烈焰球杆', image: '../../assets/cue9.png', power: 92, accuracy: 82, price: 2200 },
-    { id: 10, name: '冰霜球杆', image: '../../assets/cue10.png', power: 75, accuracy: 88, price: 1400 },
-    // 还可以继续添加更多
-];
+const cues_possess = localStorage.getItem('cueOwned')
+    ? JSON.parse(localStorage.getItem('cueOwned'))
+    : [];
+
+const cues_npossess = localStorage.getItem('cueNowned')
+    ? JSON.parse(localStorage.getItem('cueNowned'))
+    : [];
 
 const Market = () => {
+    const navigate = useNavigate();
+    const JmptoUserInfo = () => {
+        navigate('/userInfo');
+    };
+
+    const [buyingId, setBuyingId] = React.useState(null);
+
+    const BuyCue = async (cue) => {
+        const userId = localStorage.getItem('user_id');
+        if (buyingId) {
+            return;
+        }
+
+        try {
+            setBuyingId(cue.bar_id);
+            const response = await HandleBuy(userId, cue.bar_id);
+            // 根据你的后端返回结构调整判断逻辑
+            if (response && response.status === 200) {
+                alert(`成功购买球杆: ${cue.bar_name}`);
+                // 可在这里触发刷新持有列表（例如重新请求后端）
+            } else {
+                // 如果后端把错误信息放在 response.data.message
+                const msg = response?.data?.message || '购买失败';
+                alert(`购买失败: ${msg}`);
+            }
+        } catch (err) {
+            console.error('BuyCue error:', err);
+            const msg = err?.response?.data?.message || err?.message || '网络或服务器错误';
+            alert(`购买出错: ${msg}`);
+        } finally {
+            setBuyingId(null);
+        }
+    }
+
     return (
         <Bg children={"market"}>
             <div className="avatar-container">
-                <Avatar />
+                <Avatar onClick={JmptoUserInfo}/>
             </div>
             <Coins />
             <div>
-                <CueCarousel CueInfo={cues} />
+                <CueCarousel CueInfo={[...cues_npossess, ...cues_possess]} onBuy={BuyCue} />
             </div>
         </Bg>
     );

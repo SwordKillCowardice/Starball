@@ -1,7 +1,12 @@
 import React from 'react';
 import './avatar.css';
+
+const userInfo = JSON.parse(localStorage.getItem('userInfo')) || {};
+const username = localStorage.getItem('username') || '用户名';
+const level = userInfo?.level ? `Lv.${userInfo.level}` : 'Lv.1';
+
 // 支持通过 position 控制布局：'left'（头像在左）或 'right'（头像在右）
-const Avatar = ({ src = '', alt = 'avatar', name = '用户名', level = 'Lv.1', extra = '', position = 'left' }) => {
+const Avatar = ({onClick, position = 'left' }) => {
     const containerStyle = {
         display: 'flex',
         alignItems: 'center',
@@ -14,23 +19,22 @@ const Avatar = ({ src = '', alt = 'avatar', name = '用户名', level = 'Lv.1', 
     const positionClass = position === 'right' ? 'avatar--right' : 'avatar--left';
 
     return (
-        <div className={`avatar ${positionClass}`} style={containerStyle}>
+        <div className={`avatar ${positionClass}`} style={containerStyle} onClick={onClick}>
             <div className="avatar__left">
                 <img
-                    src={src?src:'https://via.placeholder.com/56'}
-                    alt={alt}
+                    src={userInfo?.img || 'https://via.placeholder.com/56'}
+                    alt={username}
                     className="avatar__img"
-                    style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover' }}
+                    style={{ width: 56, height: 56, borderRadius: '25%', objectFit: 'cover' }}
                 />
             </div>
 
             <div className="avatar__right">
-                <div className="avatar__name" title={name}>
-                    {name}
+                <div className="avatar__name" title={username}>
+                    {username}
                 </div>
                 <div className="avatar__meta">
                     <span className="avatar__level">{level}</span>
-                    {extra ? <span className="avatar__extra">{extra}</span> : null}
                 </div>
             </div>
         </div>

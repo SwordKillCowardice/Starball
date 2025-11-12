@@ -1,20 +1,78 @@
 import React, { useState } from 'react';
 import './login.css';
 import Bg from '../../components/layout/bg';
+import { registerUser, loginUser, getUserInfo } from '../../api/Login';
+import { useNavigate } from 'react-router-dom';
+
+const Store_UserInfo = (data) => {
+    localStorage.setItem('CueOwned', JSON.stringify(data.bar_possess));
+    localStorage.setItem('level', data.level);
+    localStorage.setItem('matches', data.total_games);
+    localStorage.setItem('WinGames', data.win_games);
+    localStorage.setItem('coins', data.coins);
+}
 
 const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+    const navigate = useNavigate();
 
-    const handleLogin = () => {
-        // Handle login logic here
-        // If login fails, setErrorMessage('Your error message here');
+    const handleRegister = async () => {
+        setErrorMessage(''); // Clear previous error message
+        try {
+            const response = await registerUser(username, password, { withCredentials: true });
+            console.log('状态码：', response.status);
+            console.log('响应内容：', response.data.message); 
+            console.log('user_id：', response.data.data.user_id);   
+            if (response.status === 201) {
+                alert(`注册成功`);
+                
+                const user_id = response.data.data.user_id;
+                localStorage.setItem('user_id', user_id);
+                localStorage.setItem('username', username);
+                // localStorage.setItem('password', password);
+                // ✅ 注册成功后立即获取用户信息
+                const userInfo = await getUserInfo(user_id);
+                console.log('用户信息：', userInfo.data);
+                Store_UserInfo(userInfo.data.data);
+                
+                const storedUserInfo = localStorage.getItem('userInfo');
+                console.log('userInfo：', storedUserInfo);
+
+                navigate('/mainmenu');
+            }
+        } catch (error) {
+            console.error('注册错误:', error);
+            setErrorMessage(error.data?.error || '注册失败。');
+        }
     };
 
-    const handleRegister = () => {
-        // Handle registration logic here
-        // If registration fails, setErrorMessage('Your error message here');
+    const handleLogin = async () => {
+        setErrorMessage(''); // Clear previous error message
+        try {
+            const response = await loginUser(username, password);
+            if (response.status === 200) {
+                console.log('状态码：', response.status);
+                console.log('响应内容：', response.data.message);
+                alert(`登录成功`);
+
+                localStorage.setItem('username', username);
+                localStorage.setItem('user_id', response.data.data.user_id);
+                // ✅ 登录成功后立即获取用户信息
+                const user_id = localStorage.getItem('user_id');
+                const userInfo = await getUserInfo(user_id);
+                console.log('用户信息：', userInfo.data);
+                Store_UserInfo(userInfo.data.data);
+
+                navigate('/mainmenu');
+            } else if (response.status === 401) {
+                setErrorMessage(response.data.error || '登录失败，用户名或密码错误。');
+            }
+        } catch (error) {
+            console.error('登录异常:', error);
+            setErrorMessage(error.data?.error || '登录失败。');
+        }
     };
 
     return (
