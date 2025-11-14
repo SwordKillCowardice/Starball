@@ -20,6 +20,17 @@ const Login = () => {
 
     const handleRegister = async () => {
         setErrorMessage(''); // Clear previous error message
+
+        if (!username || !password) {
+            setErrorMessage('用户名和密码不能为空');
+            return;
+        }
+
+        if (password.length < 8 || password.length > 20) {
+            setErrorMessage('密码长度必须在 8 到 20 个字符之间');
+            return;
+        }
+
         try {
             const response = await registerUser(username, password, { withCredentials: true });
             console.log('状态码：', response.status);

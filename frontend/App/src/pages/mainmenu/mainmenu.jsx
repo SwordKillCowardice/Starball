@@ -5,11 +5,11 @@ import './mainmenu.css';
 import startGameImg from '../../assets/start_game.jpg';
 import marketImg from '../../assets/market.jpg';
 import Bg from '../../components/layout/bg';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Dialog from '../../components/common/Dialog/Dialog.jsx';
 import { useNavigate } from 'react-router-dom';
 import { getCueInfo, CreateRoom, JoinRoom } from '../../api/mainmenu.js';
-
+import { socket } from '../../utils/socket.js';
 
 const MainMenu = () => {
     const navigate = useNavigate();
@@ -36,6 +36,33 @@ const MainMenu = () => {
         }
     };
 
+    useEffect(() => {
+        socket.on('connect', () => {
+            console.log('✅ 已连接到 Socket 服务器:', socket.id);
+        });
+
+        socket.on('ok', (data) => {
+            console.log('进入房间:', data);
+        });
+
+        socket.on('game start', (data) => {
+            console.log('游戏开始:', data);
+            navigate(`/game?room_id=${data.room_id}`);
+        });
+
+        socket.on('fail', (data) => {
+            console.error('操作失败:', data);
+            alert(`操作失败: ${data.error}`);
+        });
+
+        return () => {
+            socket.off('connect');
+            socket.off('ok');
+            socket.off('fail');
+            socket.off('game start');
+        };
+    }, [navigate]);
+
     const [showDialog, setShowDialog] = useState(false); // 控制弹窗状态
 
     const handleStartGame = () => {
@@ -52,6 +79,10 @@ const MainMenu = () => {
             if (response.status === 200) {
                 const roomId = response.data.data.room_id;
                 localStorage.setItem('room_id', roomId);
+
+                console.log('创建房间成功:', roomId);
+                socket.emit('join_room', { user_id: userId, room_id: roomId });
+
                 navigate(`/game?room_id=${roomId}`);
                 setShowDialog(false);
             } else {
@@ -69,6 +100,10 @@ const MainMenu = () => {
             const response = await JoinRoom(userId, roomId);
             if (response.status === 200) {
                 localStorage.setItem('room_id', roomId);
+
+                console.log('🚪 加入房间成功:', roomId);
+                socket.emit('join_room', { user_id: userId, room_id: roomId });
+
                 navigate(`/game?room_id=${roomId}`);
                 setShowDialog(false);
             } else {

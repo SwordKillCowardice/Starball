@@ -1,5 +1,6 @@
 import React from 'react';
 import './avatar.css';
+import DefaultAvatar from '../../../assets/default_avatar.jpg';
 
 const userInfo = JSON.parse(localStorage.getItem('userInfo')) || {};
 const username = localStorage.getItem('username') || '用户名';
@@ -22,7 +23,7 @@ const Avatar = ({onClick, position = 'left' }) => {
         <div className={`avatar ${positionClass}`} style={containerStyle} onClick={onClick}>
             <div className="avatar__left">
                 <img
-                    src={userInfo?.img || 'https://via.placeholder.com/56'}
+                    src={userInfo?.img || DefaultAvatar}
                     alt={username}
                     className="avatar__img"
                     style={{ width: 56, height: 56, borderRadius: '25%', objectFit: 'cover' }}

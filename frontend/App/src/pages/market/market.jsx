@@ -6,6 +6,7 @@ import Bg from '../../components/layout/bg';
 import CueCarousel from '../../components/common/CueCarousel/CueCarousel.jsx';
 import { useNavigate } from 'react-router-dom';
 import { HandleBuy } from '../../api/market.js';
+import BackButton from '../../components/common/BackButton.jsx';
 
 const cues_possess = localStorage.getItem('cueOwned')
     ? JSON.parse(localStorage.getItem('cueOwned'))
@@ -59,6 +60,7 @@ const Market = () => {
             <div>
                 <CueCarousel CueInfo={[...cues_npossess, ...cues_possess]} onBuy={BuyCue} />
             </div>
+            <BackButton/>
         </Bg>
     );
 };

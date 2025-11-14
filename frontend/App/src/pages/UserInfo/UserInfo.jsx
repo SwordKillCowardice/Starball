@@ -4,6 +4,7 @@ import Coins from '../../components/common/coins/coins.jsx';
 import './UserInfo.css';
 import Bg from '../../components/layout/bg';
 import UserInfoPanel from '../../components/common/UserInfoPanel/UserInfoPanel.jsx';
+import BackButton from "../../components/common/BackButton";
 
 const user_id = localStorage.getItem('user_id');
 const level = localStorage.getItem('level');
@@ -31,6 +32,7 @@ const UserInfo = () => {
                     winRate: (matches != 0) && WinGames ? ((WinGames / matches) * 100).toFixed(2) : 0, 
                     rank: '青铜III' }} />
             </div>
+            <BackButton />
             <div className="cue-section">
                 <h2 className="user-cue-title">我的球杆展柜</h2>
                 <div className="user-cue-carousel">
