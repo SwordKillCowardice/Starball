@@ -1,6 +1,8 @@
 """实现台球游戏的服务器端"""
 
 # 导入所需模块
+import eventlet
+eventlet.monkey_patch()
 import sqlite3 as sq
 import os
 import logging
@@ -14,7 +16,6 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
-
 user_sockets = {}
 
 # 创建日志文件夹，定义日志文件路径
@@ -325,8 +326,8 @@ def buy_bar():
         data = request.get_json()
         if not data:
             raise ValueError("客户端未传递数据")
-        user_id = data.get("user_id")
-        bar_id = data.get("bar_id")
+        user_id = int(data.get("user_id"))
+        bar_id = int(data.get("bar_id"))
         if not user_id or not bar_id:
             raise ValueError("用户id或球杆id为空")
     except ValueError as buy_error:
@@ -336,6 +337,7 @@ def buy_bar():
     # 执行操作
     try:
         with sq.connect("starball.db") as conn:
+            conn.row_factory = sq.Row
             cur = conn.cursor()
             # 检查用户id合法性
             cur.execute(
@@ -384,12 +386,31 @@ def buy_bar():
                 (coins, bar_possess, user_id),
             )
             conn.commit()
+
+            # 计算用户球杆资源情况
+            cur.execute("SELECT * FROM bar_info ORDER BY bar_id")
+            bars = cur.fetchall()
+            if not bars:
+                logger.error("商城初始化错误")
+                return (
+                    jsonify({"message": "fail", "data": {}, "error": "商城初始化错误"}),
+                    500,
+                )
+            
+            possess, npossess = [], []
+            for bar_row in bars:
+                bar_row = dict(bar_row)
+                bar_id = bar_row["bar_id"]
+                if (1 << (bar_id - 1)) & bar_possess:
+                    possess.append(bar_row)
+                else:
+                    npossess.append(bar_row)
             logger.info("购买成功")
             return (
                 jsonify(
                     {
                         "message": "ok",
-                        "data": {"coins": coins, "bar_possess": bar_possess},
+                        "data": {"coins": coins, "bar_possess": possess, "bar_npossess": npossess},
                         "error": "",
                     }
                 ),
@@ -408,7 +429,7 @@ def create_room():
         data = request.get_json()
         if not data:
             raise ValueError("客户端未传递数据")
-        user_id = data.get("user_id")
+        user_id = int(data.get("user_id"))
         if not user_id:
             raise ValueError("用户id为空")
     except ValueError as crt_error:
@@ -464,8 +485,8 @@ def join_later():
         data = request.get_json()
         if not data:
             raise ValueError("客户端未传递数据")
-        user_id = data.get("user_id")
-        room_id = data.get("room_id")
+        user_id = int(data.get("user_id"))
+        room_id = int(data.get("room_id"))
         if not user_id or not room_id:
             raise ValueError("用户id或房间id为空")
     except ValueError as join_error:
@@ -506,8 +527,8 @@ def handle_join_room(data):
     try:
         if not data:
             raise ValueError("客户端未传递数据")
-        user_id = data.get("user_id")
-        room_id = data.get("room_id")
+        user_id = int(data.get("user_id"))
+        room_id = int(data.get("room_id"))
         if not user_id or not room_id:
             raise ValueError("用户id或房间id为空")
     except ValueError as join_error:
@@ -530,7 +551,6 @@ def handle_join_room(data):
                 emit("fail", {"error": "无效的请求"})
                 return
             player1, player2 = res[1], res[2]
-
             join_room(str(room_id))
             user_sockets[user_id] = request.sid
             if user_id == player1:
@@ -618,10 +638,9 @@ def send_pos(data):
             raise ValueError("无效的请求")
         for ball in balls:
             ball_id = ball["ball_id"]
-            # ball_posx = ball["ball_posx"]
-            # ball_posy = ball["ball_posy"]
-            # 球位置的检查等待和游戏模块沟通
-            if not 0 <= ball_id <= 21:
+            ball_posx = ball["ball_posx"]
+            ball_posy = ball["ball_posy"]
+            if (not 0 <= ball_id <= 21) or (not 0 <= ball_posy <= 400) or (not 0 <= ball_posx <= 800):
                 error = True
                 break
         if not user_id or error:

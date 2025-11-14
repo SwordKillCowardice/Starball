@@ -64,3 +64,97 @@ sqlite3.OperationalError: no such column: head
 2025-11-10 20:48:05,521 - my_app - INFO - server.py:184 - 登陆失败
 2025-11-10 20:48:06,950 - my_app - INFO - server.py:140 - 用户2注册成功
 2025-11-10 20:48:08,451 - my_app - INFO - server.py:251 - 用户1获取信息成功
+2025-11-12 21:19:26,806 - my_app - INFO - server.py:140 - 用户1注册成功
+2025-11-12 21:19:28,042 - my_app - INFO - server.py:251 - 用户1获取信息成功
+2025-11-12 21:20:37,949 - my_app - INFO - server.py:304 - 获取球杆信息成功
+2025-11-12 21:22:39,079 - my_app - INFO - server.py:449 - 房间创建成功
+2025-11-12 21:23:09,869 - my_app - INFO - server.py:140 - 用户2注册成功
+2025-11-12 21:23:11,063 - my_app - INFO - server.py:251 - 用户2获取信息成功
+2025-11-12 21:30:34,100 - my_app - INFO - server.py:449 - 房间创建成功
+2025-11-12 21:31:40,347 - my_app - INFO - server.py:438 - 房间创建失败
+2025-11-12 21:32:54,917 - my_app - INFO - server.py:140 - 用户1注册成功
+2025-11-12 21:32:56,033 - my_app - INFO - server.py:251 - 用户1获取信息成功
+2025-11-12 21:32:58,086 - my_app - INFO - server.py:449 - 房间创建成功
+2025-11-12 21:33:15,149 - my_app - INFO - server.py:140 - 用户2注册成功
+2025-11-12 21:33:16,619 - my_app - INFO - server.py:251 - 用户2获取信息成功
+2025-11-12 21:54:37,077 - my_app - INFO - server.py:495 - 进入房间成功
+2025-11-12 21:55:36,369 - my_app - WARNING - server.py:488 - 房间不存在或者已满
+2025-11-12 21:55:57,007 - my_app - INFO - server.py:438 - 房间创建失败
+2025-11-12 21:56:19,919 - my_app - INFO - server.py:140 - 用户3注册成功
+2025-11-12 21:56:21,275 - my_app - INFO - server.py:251 - 用户3获取信息成功
+2025-11-12 21:56:38,686 - my_app - INFO - server.py:140 - 用户4注册成功
+2025-11-12 21:56:39,941 - my_app - INFO - server.py:251 - 用户4获取信息成功
+2025-11-12 21:57:19,029 - my_app - INFO - server.py:125 - 用户名已被占用
+2025-11-12 21:57:26,601 - my_app - INFO - server.py:140 - 用户5注册成功
+2025-11-12 21:57:27,926 - my_app - INFO - server.py:251 - 用户5获取信息成功
+2025-11-12 21:59:18,329 - my_app - INFO - server.py:449 - 房间创建成功
+2025-11-12 21:59:36,653 - my_app - INFO - server.py:140 - 用户6注册成功
+2025-11-12 21:59:38,095 - my_app - INFO - server.py:251 - 用户6获取信息成功
+2025-11-12 21:59:44,844 - my_app - INFO - server.py:495 - 进入房间成功
+2025-11-12 22:10:43,058 - my_app - INFO - server.py:140 - 用户9注册成功
+2025-11-12 22:10:44,310 - my_app - INFO - server.py:251 - 用户7获取信息成功
+2025-11-12 22:12:36,252 - my_app - INFO - server.py:304 - 获取球杆信息成功
+2025-11-12 22:28:18,085 - my_app - WARNING - server.py:333 - 购买失败: 用户id或球杆id为空
+2025-11-12 22:28:27,930 - my_app - WARNING - server.py:333 - 购买失败: 用户id或球杆id为空
+2025-11-12 22:29:07,812 - my_app - WARNING - server.py:333 - 购买失败: 用户id或球杆id为空
+2025-11-12 22:42:34,200 - my_app - WARNING - server.py:333 - 购买失败: 用户id或球杆id为空
+2025-11-12 22:44:10,420 - my_app - WARNING - server.py:333 - 购买失败: 用户id或球杆id为空
+2025-11-12 22:44:33,934 - my_app - WARNING - server.py:333 - 购买失败: 用户id或球杆id为空
+2025-11-12 22:47:11,459 - my_app - WARNING - server.py:334 - 购买失败: 用户id或球杆id为空
+2025-11-12 22:47:36,027 - my_app - WARNING - server.py:334 - 购买失败: 用户id或球杆id为空
+2025-11-12 22:48:36,499 - my_app - WARNING - server.py:367 - 已拥有当前球杆或余额不足
+2025-11-14 14:20:57,827 - my_app - INFO - server.py:140 - 用户1注册成功
+2025-11-14 14:20:59,922 - my_app - INFO - server.py:251 - 用户1获取信息成功
+2025-11-14 14:27:23,819 - my_app - INFO - server.py:140 - 用户2注册成功
+2025-11-14 14:27:25,096 - my_app - INFO - server.py:251 - 用户2获取信息成功
+2025-11-14 14:33:31,274 - my_app - INFO - server.py:140 - 用户3注册成功
+2025-11-14 14:33:33,379 - my_app - INFO - server.py:251 - 用户3获取信息成功
+2025-11-14 14:39:46,491 - my_app - INFO - server.py:449 - 房间创建成功
+2025-11-14 14:39:46,507 - my_app - INFO - server.py:540 - 玩家None加入房间, 游戏正式开始
+2025-11-14 14:41:40,617 - my_app - INFO - server.py:438 - 房间创建失败
+2025-11-14 14:41:53,845 - my_app - INFO - server.py:140 - 用户4注册成功
+2025-11-14 14:41:55,531 - my_app - INFO - server.py:251 - 用户4获取信息成功
+2025-11-14 14:41:58,158 - my_app - INFO - server.py:449 - 房间创建成功
+2025-11-14 14:41:58,263 - my_app - INFO - server.py:541 - 玩家None加入房间, 游戏正式开始
+2025-11-14 14:42:49,538 - my_app - INFO - server.py:140 - 用户5注册成功
+2025-11-14 14:42:50,597 - my_app - INFO - server.py:251 - 用户5获取信息成功
+2025-11-14 14:42:54,150 - my_app - INFO - server.py:449 - 房间创建成功
+2025-11-14 14:42:54,192 - my_app - INFO - server.py:542 - 玩家None加入房间, 游戏正式开始
+2025-11-14 14:43:53,494 - my_app - INFO - server.py:140 - 用户6注册成功
+2025-11-14 14:43:54,672 - my_app - INFO - server.py:251 - 用户6获取信息成功
+2025-11-14 14:43:57,937 - my_app - INFO - server.py:449 - 房间创建成功
+2025-11-14 14:43:57,982 - my_app - INFO - server.py:544 - 玩家None加入房间, 游戏正式开始
+2025-11-14 14:46:26,345 - my_app - INFO - server.py:140 - 用户8注册成功
+2025-11-14 14:46:27,271 - my_app - INFO - server.py:251 - 用户7获取信息成功
+2025-11-14 14:46:29,751 - my_app - INFO - server.py:449 - 房间创建成功
+2025-11-14 14:46:29,853 - my_app - INFO - server.py:541 - 房间5创建者7加入房间
+2025-11-14 14:47:26,692 - my_app - INFO - server.py:140 - 用户9注册成功
+2025-11-14 14:47:28,617 - my_app - INFO - server.py:251 - 用户8获取信息成功
+2025-11-14 14:47:37,289 - my_app - INFO - server.py:495 - 进入房间成功
+2025-11-14 14:47:37,401 - my_app - INFO - server.py:539 - 玩家8加入房间, 游戏正式开始
+2025-11-14 14:50:33,849 - my_app - INFO - server.py:140 - 用户10注册成功
+2025-11-14 14:50:36,185 - my_app - INFO - server.py:251 - 用户9获取信息成功
+2025-11-14 14:52:17,557 - my_app - INFO - server.py:140 - 用户12注册成功
+2025-11-14 14:52:19,276 - my_app - INFO - server.py:251 - 用户10获取信息成功
+2025-11-14 14:54:24,998 - my_app - INFO - server.py:140 - 用户164注册成功
+2025-11-14 14:54:26,759 - my_app - INFO - server.py:251 - 用户11获取信息成功
+2025-11-14 14:54:34,425 - my_app - INFO - server.py:304 - 获取球杆信息成功
+2025-11-14 15:02:07,395 - my_app - INFO - server.py:387 - 购买成功
+2025-11-14 15:05:20,942 - my_app - INFO - server.py:304 - 获取球杆信息成功
+2025-11-14 15:22:03,813 - my_app - INFO - server.py:305 - 获取球杆信息成功
+2025-11-14 15:22:31,224 - my_app - INFO - server.py:141 - 用户4198646注册成功
+2025-11-14 15:22:33,019 - my_app - INFO - server.py:252 - 用户12获取信息成功
+2025-11-14 15:22:35,838 - my_app - INFO - server.py:305 - 获取球杆信息成功
+2025-11-14 15:22:40,345 - my_app - INFO - server.py:388 - 购买成功
+2025-11-14 15:50:16,800 - my_app - INFO - server.py:141 - 用户1454891注册成功
+2025-11-14 15:50:18,603 - my_app - INFO - server.py:252 - 用户13获取信息成功
+2025-11-14 15:50:21,646 - my_app - INFO - server.py:305 - 获取球杆信息成功
+2025-11-14 15:50:41,403 - my_app - INFO - server.py:408 - 购买成功
+2025-11-14 15:52:46,811 - my_app - INFO - server.py:141 - 用户2164156注册成功
+2025-11-14 15:52:48,791 - my_app - INFO - server.py:252 - 用户14获取信息成功
+2025-11-14 15:52:51,714 - my_app - INFO - server.py:305 - 获取球杆信息成功
+2025-11-14 15:52:56,029 - my_app - INFO - server.py:408 - 购买成功
+2025-11-14 15:54:10,746 - my_app - INFO - server.py:141 - 用户46413注册成功
+2025-11-14 15:54:11,931 - my_app - INFO - server.py:252 - 用户15获取信息成功
+2025-11-14 15:54:13,392 - my_app - INFO - server.py:305 - 获取球杆信息成功
+2025-11-14 15:54:14,863 - my_app - INFO - server.py:408 - 购买成功
