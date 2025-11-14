@@ -17,6 +17,16 @@
     margin-left: 0px;
 }
 
+.avatar:hover {
+    cursor: pointer;
+    /* 鼠标变成小手 */
+    transform: scale(1.2);
+    /* 放大 5% */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    /* 平滑过渡 */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
 /* 头像容器 */
 .avatar__photo {
     width: var(--avatar-size);

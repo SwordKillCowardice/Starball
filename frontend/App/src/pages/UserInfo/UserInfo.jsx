@@ -4,13 +4,17 @@ import Coins from '../../components/common/coins/coins.jsx';
 import './UserInfo.css';
 import Bg from '../../components/layout/bg';
 import UserInfoPanel from '../../components/common/UserInfoPanel/UserInfoPanel.jsx';
+import BackButton from "../../components/common/BackButton";
 
-const CueOwned = [
-    { id: 1, name: '红心球杆', image: '../../assets/cue1.png', power: 80, accuracy: 70, price: 1000 },
-    { id: 3, name: '黄金球杆', image: '../../assets/cue3.png', power: 100, accuracy: 80, price: 2000 },
-    { id: 5, name: '黑曜石球杆', image: '../../assets/cue5.png', power: 95, accuracy: 90, price: 2500 },
-    // 这里可以添加用户拥有的球杆信息
-];
+const user_id = localStorage.getItem('user_id');
+const level = localStorage.getItem('level');
+const matches = localStorage.getItem('matches');
+const WinGames = localStorage.getItem('WinGames');
+
+//
+const CueOwned = localStorage.getItem('cueOwned')
+    ? JSON.parse(localStorage.getItem('cueOwned'))
+    : []
 
 const UserInfo = () => {
     return (
@@ -23,14 +27,18 @@ const UserInfo = () => {
             top: '150px',
             left: '50%',
   transform: 'translateX(-50%)'}} >
-                <UserInfoPanel user={{ id: '123456', matches: 0, winRate: 0, rank: '青铜III' }} />
+                <UserInfoPanel user={{ id: user_id ? user_id : '123456', 
+                    matches: matches ? matches : 0,
+                    winRate: (matches != 0) && WinGames ? ((WinGames / matches) * 100).toFixed(2) : 0, 
+                    rank: '青铜III' }} />
             </div>
+            <BackButton />
             <div className="cue-section">
-                <h2 className="cue-title">我的球杆展柜</h2>
-                <div className="cue-carousel">
+                <h2 className="user-cue-title">我的球杆展柜</h2>
+                <div className="user-cue-carousel">
                     {CueOwned.map((cue) => (
-                        <div key={cue.id} className="cue-card">
-                            <img src={cue.image} alt={cue.name} className="cue-image" />
+                        <div key={cue.bar_id} className="user-cue-card">
+                            <img src={cue.bar_image} alt={cue.bar_name} className="user-cue-image" />
                         </div>
                     ))}
                 </div>

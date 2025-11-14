@@ -19,7 +19,7 @@
     /* 确保在背景图之上 */
 }
 
-.cue-carousel {
+.user-cue-carousel {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -38,7 +38,7 @@
     color: white;
 }
 
-.cue-card {
+.user-cue-card {
     display: flex;
     /* 启用 Flex 布局 */
     flex-direction: column;
@@ -56,11 +56,11 @@
     transition: transform 0.3s;
 }
 
-.cue-card:hover {
+.user-cue-card:hover {
     transform: scale(1.05);
 }
 
-.cue-image {
+.user-cue-image {
     width: 100%;
     height: 140px;
     object-fit: contain;
