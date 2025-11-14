@@ -531,7 +531,7 @@ def handle_join_room(data):
                 return
             player1, player2 = res[1], res[2]
 
-            join_room(room_id)
+            join_room(str(room_id))
             user_sockets[user_id] = request.sid
             if user_id == player1:
                 logger.info("房间%s创建者%s加入房间", room_id, player1)
