@@ -8,7 +8,7 @@ import os
 import logging
 from logging.handlers import RotatingFileHandler
 import bcrypt
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_socketio import SocketIO, emit, join_room
 from flask_cors import CORS
 
@@ -69,23 +69,24 @@ def initialize_table():
             bar_id INTEGER PRIMARY KEY AUTOINCREMENT,
             bar_name TEXT NOT NULL UNIQUE,
             price INTEGER NOT NULL,
-            bar_picture TEXT NOT NULL DEFAULT "")"""
+            bar_picturea TEXT NOT NULL DEFAULT "",
+            bar_pictureb TEXT NOT NULL DEFAULT "")"""
         )
         cur.execute("SELECT COUNT(*) FROM bar_info")
         res = cur.fetchone()[0]
         if not res:
             bar_data = [
-                ("极速球杆", 520),
-                ("力量球杆", 880),
-                ("精准球杆", 310),
-                ("影刃球杆", 760),
-                ("天命球杆", 450),
-                ("雷霆球杆", 210),
-                ("幻影球杆", 980),
-                ("霸王球杆", 600),
+                ("极速球杆", 520, "/bars/a1.png", "/bars/b1.png"),
+                ("力量球杆", 880, "/bars/a2.png", "/bars/b2.png"),
+                ("精准球杆", 310, "/bars/a3.png", "/bars/b3.png"),
+                ("影刃球杆", 760, "/bars/a4.png", "/bars/b4.png"),
+                ("天命球杆", 450, "/bars/a5.png", "/bars/b5.png"),
+                ("雷霆球杆", 210, "/bars/a6.png", "/bars/b6.png"),
+                ("幻影球杆", 980, "/bars/a7.png", "/bars/b7.png"),
+                ("霸王球杆", 600, "/bars/a8.png", "/bars/b8.png"),
             ]
             cur.executemany(
-                "INSERT INTO bar_info (bar_name, price) VALUES (?, ?)", bar_data
+                "INSERT INTO bar_info (bar_name, price, bar_picturea, bar_pictureb) VALUES (?, ?, ?, ?)", bar_data
             )
 
         # 创建对局信息表
@@ -210,6 +211,47 @@ def login():
         return jsonify({"message": "fail", "data": {}, "error": "数据库服务异常"}), 500
 
 
+@app.route("/api/upload", methods=["POST"])
+def upload_head():
+    """上传用户头像"""
+    # 检查数据
+    try:
+        user_id = int(request.form.get("user_id"))
+        if "head" not in request.files:
+            raise ValueError("未上传头像文件")
+        head_file = request.files["head"]
+        if head_file.filename == "":
+            raise ValueError("头像文件名为空")
+    except (TypeError, ValueError) as upload_error:
+        logger.warning("上传头像失败: %s", upload_error)
+        return jsonify({"message": "fail", "error": "无效的请求"}), 400
+
+    # 执行操作
+    try:
+        filename = f"{user_id}.png"  
+        filepath = os.path.join("head", filename)  
+        os.makedirs(os.path.dirname(filepath), exist_ok=True) 
+        head_file.save(filepath)
+
+        with sq.connect("starball.db") as conn:
+            cur = conn.cursor()
+            cur.execute(
+                "UPDATE user_info SET head = ? WHERE user_id = ?", (filename, user_id)
+            )
+            if cur.rowcount == 0:
+                logger.warning("不存在的用户%s尝试上传头像", user_id)
+                return (
+                    jsonify({"message": "fail", "error": "无效的请求"}),
+                    404,
+                )
+            conn.commit()
+            logger.info("用户%s上传头像成功", user_id)
+            return jsonify({"message": "ok", "error": ""}), 200
+    except sq.Error:
+        logger.exception("数据库服务异常")
+        return jsonify({"message": "fail", "error": "数据库服务异常"}), 500
+
+
 @app.route("/api/user", methods=["GET"])
 def get_user_info():
     """获取用户信息"""
@@ -254,6 +296,15 @@ def get_user_info():
     except sq.Error:
         logger.exception("数据库服务异常")
         return jsonify({"message": "fail", "data": {}, "error": "数据库服务异常"}), 500
+
+
+@app.route('/bars/<filename>')
+def get_bars(filename):
+    return send_from_directory('bars', filename)
+
+@app.route('/head/<filename>')
+def get_head(filename):
+    return send_from_directory('head', filename)
 
 
 @app.route("/api/bar/list", methods=["GET"])
