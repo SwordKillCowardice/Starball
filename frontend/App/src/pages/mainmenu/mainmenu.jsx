@@ -82,9 +82,12 @@ const MainMenu = () => {
 
                 console.log('创建房间成功:', roomId);
                 socket.emit('join_room', { user_id: userId, room_id: roomId });
-
                 navigate(`/game?room_id=${roomId}`);
                 setShowDialog(false);
+
+                socket.on('ok', (data) => {
+                    console.log('进入房间:', data);
+                });
             } else {
                 alert('创建房间失败');
             }
@@ -101,7 +104,7 @@ const MainMenu = () => {
             if (response.status === 200) {
                 localStorage.setItem('room_id', roomId);
 
-                console.log('🚪 加入房间成功:', roomId);
+                console.log('加入房间成功:', roomId);
                 socket.emit('join_room', { user_id: userId, room_id: roomId });
 
                 navigate(`/game?room_id=${roomId}`);
@@ -120,7 +123,7 @@ const MainMenu = () => {
             <div className="avatar-container">
                 <Avatar onClick={JmptoUserInfo}/>
             </div>
-            <Coins />
+            <Coins/>
             <div className="main-menu">
                 <div className="content">
                     <div className="left-section" onClick={handleStartGame}>

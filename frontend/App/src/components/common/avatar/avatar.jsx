@@ -1,13 +1,16 @@
 import React from 'react';
 import './avatar.css';
-import DefaultAvatar from '../../../assets/default_avatar.jpg';
-
-const userInfo = JSON.parse(localStorage.getItem('userInfo')) || {};
-const username = localStorage.getItem('username') || '用户名';
-const level = userInfo?.level ? `Lv.${userInfo.level}` : 'Lv.1';
 
 // 支持通过 position 控制布局：'left'（头像在左）或 'right'（头像在右）
 const Avatar = ({onClick, position = 'left' }) => {
+
+    const SERVER_URL = import.meta.env.VITE_BACKEND_URL;
+    const DefaultAvatar = SERVER_URL + '/head/0.png';
+
+    const userInfo = JSON.parse(localStorage.getItem('userInfo')) || {};
+    const username = localStorage.getItem('username') || '用户名';
+    const Win_Rate = localStorage.getItem('Win_Rate') || '0%';
+    
     const containerStyle = {
         display: 'flex',
         alignItems: 'center',
@@ -35,7 +38,7 @@ const Avatar = ({onClick, position = 'left' }) => {
                     {username}
                 </div>
                 <div className="avatar__meta">
-                    <span className="avatar__level">{level}</span>
+                    <span className="avatar__level">{"胜率: " + Win_Rate}</span>
                 </div>
             </div>
         </div>
@@ -46,8 +49,6 @@ Avatar.defaultProps = {
     src: '',
     alt: 'avatar',
     name: '用户名',
-    level: 'Lv.1',
-    extra: '',
     position: 'left',
 };
 

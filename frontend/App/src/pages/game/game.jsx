@@ -5,6 +5,7 @@ import Avatar from '../../components/common/avatar/avatar';
 import vsImage from '../../assets/vs.png';
 import Bg from '../../components/layout/bg';
 
+
 const Game = () => {
     return (
         <Bg>

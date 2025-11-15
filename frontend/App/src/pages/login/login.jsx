@@ -4,11 +4,11 @@ import Bg from '../../components/layout/bg';
 import { registerUser, loginUser, getUserInfo } from '../../api/Login';
 import { useNavigate } from 'react-router-dom';
 
-const Store_UserInfo = (data) => {
+const StoreUserInfo = (data) => {
     localStorage.setItem('CueOwned', JSON.stringify(data.bar_possess));
-    localStorage.setItem('level', data.level);
     localStorage.setItem('matches', data.total_games);
     localStorage.setItem('WinGames', data.win_games);
+    localStorage.setItem('Win_Rate', data.win_games === 0 ? '0%' : ((data.win_games / data.total_games) * 100).toFixed(2) + '%');
     localStorage.setItem('coins', data.coins);
 }
 
@@ -42,12 +42,11 @@ const Login = () => {
                 const user_id = response.data.data.user_id;
                 localStorage.setItem('user_id', user_id);
                 localStorage.setItem('username', username);
-                // localStorage.setItem('password', password);
-                // ✅ 注册成功后立即获取用户信息
-                const userInfo = await getUserInfo(user_id);
-                console.log('用户信息：', userInfo.data);
-                Store_UserInfo(userInfo.data.data);
-                
+
+                const res = await getUserInfo(user_id);
+                localStorage.setItem('userInfo', JSON.stringify(res.data.data));
+                console.log('用户信息：', res.data);
+                StoreUserInfo(res.data.data);
                 const storedUserInfo = localStorage.getItem('userInfo');
                 console.log('userInfo：', storedUserInfo);
 
@@ -71,10 +70,12 @@ const Login = () => {
                 localStorage.setItem('username', username);
                 localStorage.setItem('user_id', response.data.data.user_id);
                 // ✅ 登录成功后立即获取用户信息
-                const user_id = localStorage.getItem('user_id');
-                const userInfo = await getUserInfo(user_id);
-                console.log('用户信息：', userInfo.data);
-                Store_UserInfo(userInfo.data.data);
+                const res = await getUserInfo(user_id);
+                localStorage.setItem('userInfo', JSON.stringify(res.data.data));
+                console.log('用户信息：', res.data);
+                StoreUserInfo(res.data.data);
+                const storedUserInfo = localStorage.getItem('userInfo');
+                console.log('userInfo：', storedUserInfo);
 
                 navigate('/mainmenu');
             } else if (response.status === 401) {
